@@ -1197,6 +1197,242 @@ select {
   color: var(--text-sub);
 }
 
+/* ===== FILE UPLOAD ZONE ===== */
+.upload-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  background: #f8fafc;
+  user-select: none;
+}
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.upload-zone.drag-over {
+  transform: scale(1.01);
+}
+.upload-icon {
+  font-size: 2rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  display: block;
+  transition: color 0.2s;
+  pointer-events: none;
+}
+.upload-zone:hover .upload-icon,
+.upload-zone.drag-over .upload-icon {
+  color: var(--primary);
+}
+.upload-title {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  margin: 0 0 4px;
+  pointer-events: none;
+}
+.upload-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.upload-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Upload preview list */
+.upload-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.preview-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 180px;
+  max-width: 260px;
+}
+.preview-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+.preview-icon-pdf {
+  width: 44px;
+  height: 44px;
+  background: #fee2e2;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ef4444;
+  font-size: 1.2rem;
+}
+.preview-info {
+  flex: 1;
+  min-width: 0;
+}
+.preview-name {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-size {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-sub);
+}
+.preview-remove {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+  font-size: 0.8rem;
+}
+.preview-remove:hover {
+  color: var(--danger);
+  background: #fee2e2;
+}
+.preview-media-link {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+.preview-media-link:hover {
+  opacity: 0.75;
+}
+.preview-name-link {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+.preview-name-link:hover {
+  text-decoration: underline;
+}
+
+/* Proof files shown in detail modal */
+.proof-files-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.proof-files-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+.proof-files-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.proof-img-link img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: opacity 0.15s;
+  display: block;
+}
+.proof-img-link:hover img { opacity: 0.8; }
+.proof-pdf-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  color: #e11d48;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  max-width: 200px;
+}
+.proof-pdf-link span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.proof-pdf-link:hover { background: #ffe4e6; }
+
+/* Proof file card (modal) */
+.proof-file-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.proof-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.proof-download-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* Proof badge in manager table */
+.proof-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #eff6ff;
+  color: var(--primary);
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 /* Leave Status */
 .text-muted {
   color: var(--text-sub);

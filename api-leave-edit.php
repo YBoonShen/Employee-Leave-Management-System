@@ -9,16 +9,15 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
-$payload = json_decode(file_get_contents('php://input'), true);
-$requestId = (int)($payload['id'] ?? 0);
+$requestId = (int)($_POST['id'] ?? 0);
 
 try {
     $db = get_db_connection();
-    
-    $userId = $_SESSION['user_id'];
-    $duration = (int)$payload['duration'];
-    $start = $payload['start'];
-    $end = $payload['end'];
+
+    $userId   = $_SESSION['user_id'];
+    $duration = (int)($_POST['duration'] ?? 0);
+    $start    = $_POST['start'] ?? '';
+    $end      = $_POST['end']   ?? '';
 
     // 1. Check if it belongs to user and is still Pending
     $check = $db->prepare('SELECT status, duration_days FROM leave_requests WHERE id = :id AND user_id = :uid');
@@ -55,15 +54,57 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, updated_at = NOW() WHERE id = :id');
-    $stmt->execute([
-        ':type' => $payload['type'],
-        ':start' => $start,
-        ':end' => $end,
-        ':duration' => $duration,
-        ':reason' => $payload['reason'],
-        ':id' => $requestId
-    ]);
+    // Handle replacement file uploads
+    $uploadDir  = __DIR__ . '/uploads/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $proofFiles = null;
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+
+    if (!empty($_FILES['proof_files']['name'][0])) {
+        // Delete old files for this request
+        $old = $db->prepare('SELECT proof_files FROM leave_requests WHERE id = :id');
+        $old->execute([':id' => $requestId]);
+        $oldProof = $old->fetchColumn();
+        if ($oldProof) {
+            foreach (json_decode($oldProof, true) as $f) {
+                $path = $uploadDir . basename($f);
+                if (file_exists($path)) unlink($path);
+            }
+        }
+        $savedFiles = [];
+        foreach ($_FILES['proof_files']['tmp_name'] as $i => $tmpFile) {
+            if ($_FILES['proof_files']['error'][$i] !== UPLOAD_ERR_OK) continue;
+            $mime = mime_content_type($tmpFile);
+            if (!in_array($mime, $allowedMimes)) continue;
+            $ext      = strtolower(pathinfo($_FILES['proof_files']['name'][$i], PATHINFO_EXTENSION));
+            $filename = uniqid('proof_', true) . '.' . $ext;
+            move_uploaded_file($tmpFile, $uploadDir . $filename);
+            $savedFiles[] = $filename;
+        }
+        $proofFiles = !empty($savedFiles) ? json_encode($savedFiles) : null;
+
+        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, proof_files = :proof, updated_at = NOW() WHERE id = :id');
+        $stmt->execute([
+            ':type'     => $_POST['type'] ?? 'Annual',
+            ':start'    => $start,
+            ':end'      => $end,
+            ':duration' => $duration,
+            ':reason'   => $_POST['reason'] ?? null,
+            ':proof'    => $proofFiles,
+            ':id'       => $requestId,
+        ]);
+    } else {
+        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, updated_at = NOW() WHERE id = :id');
+        $stmt->execute([
+            ':type'     => $_POST['type'] ?? 'Annual',
+            ':start'    => $start,
+            ':end'      => $end,
+            ':duration' => $duration,
+            ':reason'   => $_POST['reason'] ?? null,
+            ':id'       => $requestId,
+        ]);
+    }
 
     echo json_encode(['ok' => true]);
 } catch (Throwable $e) {

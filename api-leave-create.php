@@ -16,21 +16,40 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$payload = json_decode(file_get_contents('php://input'), true);
-if (!$payload) {
+if (empty($_POST)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
+    echo json_encode(['error' => 'Invalid request']);
     exit;
 }
 
 try {
     $db = get_db_connection();
     $userId = $_SESSION['user_id'];
-    
-    $start = $payload['start'];
-    $end = $payload['end'];
-    $duration = (int)($payload['duration'] ?? 1);
-    $type = $payload['type'] ?? 'Annual';
+
+    $start    = $_POST['start']    ?? '';
+    $end      = $_POST['end']      ?? '';
+    $duration = (int)($_POST['duration'] ?? 1);
+    $type     = $_POST['type']     ?? 'Annual';
+
+    // Handle file uploads
+    $uploadDir = __DIR__ . '/uploads/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $savedFiles   = [];
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+
+    if (!empty($_FILES['proof_files']['name'][0])) {
+        foreach ($_FILES['proof_files']['tmp_name'] as $i => $tmpFile) {
+            if ($_FILES['proof_files']['error'][$i] !== UPLOAD_ERR_OK) continue;
+            $mime = mime_content_type($tmpFile);
+            if (!in_array($mime, $allowedMimes)) continue;
+            $ext      = strtolower(pathinfo($_FILES['proof_files']['name'][$i], PATHINFO_EXTENSION));
+            $filename = uniqid('proof_', true) . '.' . $ext;
+            move_uploaded_file($tmpFile, $uploadDir . $filename);
+            $savedFiles[] = $filename;
+        }
+    }
+    $proofFiles = !empty($savedFiles) ? json_encode($savedFiles) : null;
 
     // 1. Duplicate check (overlapping dates for same user)
     $dupStmt = $db->prepare('SELECT id FROM leave_requests WHERE user_id = :uid AND status != "Rejected" AND ((start_date <= :end AND end_date >= :start))');
@@ -56,15 +75,16 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration_days, reason) 
-                          VALUES (:uid, :type, :start, :end, :duration, :reason)');
+    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration_days, reason, proof_files)
+                          VALUES (:uid, :type, :start, :end, :duration, :reason, :proof)');
     $stmt->execute([
-        ':uid' => $userId,
-        ':type' => $type,
-        ':start' => $start,
-        ':end' => $end,
+        ':uid'    => $userId,
+        ':type'   => $type,
+        ':start'  => $start,
+        ':end'    => $end,
         ':duration' => $duration,
-        ':reason' => $payload['reason'] ?? null,
+        ':reason' => $_POST['reason'] ?? null,
+        ':proof'  => $proofFiles,
     ]);
 
     $id = $db->lastInsertId();

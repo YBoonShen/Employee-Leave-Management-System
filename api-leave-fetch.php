@@ -15,6 +15,7 @@ try {
     
     // MIGRATION: Ensure allowance column exists (default 21 days)
     $db->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS allowance INT DEFAULT 21");
+    $db->exec("ALTER TABLE leave_requests ADD COLUMN IF NOT EXISTS proof_files TEXT NULL");
     
     $currentId = $_SESSION['user_id'];
     $currentRole = $_SESSION['role'] ?? 'employee';
@@ -73,6 +74,7 @@ try {
             'status' => $r['status'],
             'comment' => $r['manager_comment'] ?? '',
             'date' => substr($r['created_at'], 0, 10),
+            'proofFiles' => !empty($r['proof_files']) ? json_decode($r['proof_files'], true) : [],
         ];
     }, $rows);
 
