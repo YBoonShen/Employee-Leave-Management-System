@@ -1,44 +1,50 @@
 # NexusLeave - Project Technical Report
+
 # NexusLeave - 项目技术报告
 
 ## 1. System Overview | 系统概述
+
 NexusLeave is a web-based system for managing employee leave. It has two roles: **Employee** and **Manager**.
 NexusLeave 是一个用于管理员工休假的网页系统。它包含两个角色：**员工** 和 **经理**。
 
 ---
 
 ## 2. File Directory | 文件目录
-| New File Name | Purpose |
-| :--- | :--- |
-| `page-login.php` | The first page you see to sign in. |
-| `page-register.php` | Page to create a new account. |
-| `page-main.php` | The main dashboard after you log in. |
+
+| New File Name        | Purpose                                      |
+| :------------------- | :------------------------------------------- |
+| `page-login.php`     | The first page you see to sign in.           |
+| `page-register.php`  | Page to create a new account.                |
+| `page-main.php`      | The main dashboard after you log in.         |
 | `view-dashboard.php` | The layout and HTML structure of the system. |
-| `script.js` | All the "brains" and logic of the website. |
-| `styles.css` | All the colors, fonts, and layout designs. |
+| `script.js`          | All the "brains" and logic of the website.   |
+| `styles.css`         | All the colors, fonts, and layout designs.   |
 
 ---
 
 ## 3. Step-by-Step User Flow | 完整操作流程
 
 ### Flow 1: Authentication (Login/Register) | 身份验证流
+
 1.  **Register**: User fills in 7 fields. The system checks if the email already exists.
-    *   **Failure**: If email is taken, it shows "Email already in use."
+    - **Failure**: If email is taken, it shows "Email already in use."
 2.  **Login**: User enters email and password.
-    *   **Success**: Goes to `page-main.php`.
-    *   **Failure**: Shows "Invalid email or password" if details are wrong.
+    - **Success**: Goes to `page-main.php`.
+    - **Failure**: Shows "Invalid email or password" if details are wrong.
 
 ### Flow 2: Applying for Leave | 请假申请流
+
 1.  **Select Dates**: User picks start and end dates.
 2.  **Logic**: `calculateWorkDays()` runs to skip Saturday and Sunday.
 3.  **Backend Check**: `api-leave-create.php` checks two things:
-    *   **Balance**: Do you have enough days left?
-    *   **Overlap**: Did you already apply for leave on these dates?
-4.  **Result**: 
-    *   **Success**: Button shows "Submitting...", then shows a success screen.
-    *   **Failure**: Shows a red Toast message like "Insufficient Balance".
+    - **Balance**: Do you have enough days left?
+    - **Overlap**: Did you already apply for leave on these dates?
+4.  **Result**:
+    - **Success**: Button shows "Submitting...", then shows a success screen.
+    - **Failure**: Shows a red Toast message like "Insufficient Balance".
 
 ### Flow 3: Manager Approval | 经理审批流
+
 1.  **View Requests**: Manager sees a list of pending requests.
 2.  **Check Details**: Manager clicks the employee **Avatar** to see their full profile and history in a large 1000px window.
 3.  **Action**: Manager clicks **Approve** or **Reject**.
@@ -50,6 +56,7 @@ NexusLeave 是一个用于管理员工休假的网页系统。它包含两个角
 ## 4. Full Function List (Numbered) | 完整函数清单
 
 ### Frontend Functions (script.js)
+
 1.  **init()**: Starts the app and sets the minimum date for the calendar.
 2.  **fetchAPI()**: Sends data to the server and gets a response back.
 3.  **loadFromServer()**: Gets your profile and leave list from the database.
@@ -80,6 +87,7 @@ NexusLeave 是一个用于管理员工休假的网页系统。它包含两个角
 28. **closeModal()**: Closes any open pop-up window.
 
 ### Backend APIs (PHP)
+
 29. **auth-login-process.php**: Checks your password and starts your session.
 30. **auth-register-process.php**: Saves new users into the database.
 31. **auth-logout-process.php**: Logs you out safely.
@@ -102,16 +110,17 @@ NexusLeave 是一个用于管理员工休假的网页系统。它包含两个角
 ## 5. Security & Error Handling | 安全与错误处理
 
 ### Why would a function fail? | 为什么会操作失败？
-*   **Wrong Role**: If an employee tries to use a Manager API, they get "403 Forbidden".
-*   **Duplicate Date**: If you try to apply for leave on a date you already booked.
-*   **No Balance**: If you try to take 10 days but only have 5 left.
-*   **Empty Fields**: If you leave the "Reason" blank when applying.
-*   **Self-Delete**: A manager cannot delete their own account.
+
+- **Wrong Role**: If an employee tries to use a Manager API, they get "403 Forbidden".
+- **Duplicate Date**: If you try to apply for leave on a date you already booked.
+- **No Balance**: If you try to take 10 days but only have 5 left.
+- **Empty Fields**: If you leave the "Reason" blank when applying.
+- **Self-Delete**: A manager cannot delete their own account.
 
 ### Defensive Design | 防御性设计
-*   **Loading Spinners**: Buttons become unclickable when waiting for the server.
-*   **DB Migration**: The system automatically adds missing columns (like `allowance`) if they don't exist.
-*   **Silent Refresh**: The system updates numbers without making the user click "Refresh".
+
+- **Loading Spinners**: Buttons become unclickable when waiting for the server.
+- **DB Migration**: The system automatically adds missing columns (like `allowance`) if they don't exist.
+- **Silent Refresh**: The system updates numbers without making the user click "Refresh".
 
 ---
-_Updated on 18 March 2026 for the Final Technical Submission._
