@@ -26,6 +26,7 @@ const app = {
     currentUser: { name: '', id: '', allowance: 21, employee_id: '' },
     requests: [],
     editingRequestId: null,
+    uploadedFiles: [],
   },
 
   async init() {
@@ -186,15 +187,27 @@ const app = {
     const mgrTable = document.getElementById('manager-table-body');
     if (mgrTable) {
       const list = this.state.requests.filter(r => r.status === 'Pending');
-      mgrTable.innerHTML = list.map(r => `<tr>
-        <td><div class="employee-cell"><span class="employee-name">${r.empName}</span></div></td>
-        <td>${r.type}</td><td>${r.duration}d</td>
-        <td>
-          <div class="action-group">
-            <button class="btn btn-sm btn-approve" onclick="app.approveRequest(${r.id})">Approve</button>
-            <button class="btn btn-sm btn-reject" onclick="app.rejectRequest(${r.id})">Reject</button>
-          </div>
-        </td></tr>`).join('');
+      if (list.length === 0) {
+        mgrTable.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No pending requests.</td></tr>`;
+      } else {
+        mgrTable.innerHTML = list.map(r => `<tr>
+          <td><div class="employee-cell"><span class="employee-name">${r.empName}</span></div></td>
+          <td>${r.type}</td>
+          <td>${r.duration}d</td>
+          <td>
+            ${r.proofFiles && r.proofFiles.length > 0
+              ? `<span class="proof-badge" title="${r.proofFiles.length} file(s) attached"><i class="fas fa-paperclip"></i> ${r.proofFiles.length}</span>`
+              : `<span style="color:#cbd5e1; font-size:0.8rem;">—</span>`}
+          </td>
+          <td>
+            <div class="action-group">
+              <button class="btn btn-sm btn-outline" onclick="app.viewRequestDetails(${r.id})" title="View Details &amp; Files"><i class="fas fa-eye"></i></button>
+              <button class="btn btn-sm btn-approve" onclick="app.approveRequest(${r.id})">Approve</button>
+              <button class="btn btn-sm btn-reject" onclick="app.rejectRequest(${r.id})">Reject</button>
+            </div>
+          </td>
+        </tr>`).join('');
+      }
     }
   },
 
@@ -543,19 +556,15 @@ const app = {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
-    
+
     const type = document.querySelector('input[name="leave-type"]:checked').value;
     const start = document.getElementById('start-date').value;
     const end = document.getElementById('end-date').value;
     const reason = document.getElementById('reason').value;
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    
-    if (endDate < startDate) {
+    if (new Date(end) < new Date(start)) {
       return this.showToast('Validation Error', 'End date cannot be earlier than start date.', 'danger');
     }
-
     const duration = this.calculateWorkDays(start, end);
     if (duration <= 0) {
       return this.showToast('Validation Error', 'Selected period contains no work days.', 'danger');
@@ -564,20 +573,28 @@ const app = {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
-    const payload = { type, start, end, reason, duration };
-    let res;
+    const fd = new FormData();
+    fd.append('type', type);
+    fd.append('start', start);
+    fd.append('end', end);
+    fd.append('reason', reason);
+    fd.append('duration', duration);
+    this.state.uploadedFiles.forEach(f => fd.append('proof_files[]', f));
 
-    if (this.state.editingRequestId) {
-      payload.id = this.state.editingRequestId;
-      res = await this.fetchAPI(API.EDIT_REQUEST, 'POST', payload);
-    } else {
-      res = await this.fetchAPI(API.CREATE_REQUEST, 'POST', payload);
-    }
+    let res = null;
+    try {
+      const url = this.state.editingRequestId ? API.EDIT_REQUEST : API.CREATE_REQUEST;
+      if (this.state.editingRequestId) fd.append('id', this.state.editingRequestId);
+      const response = await fetch(url, { method: 'POST', body: fd });
+      res = await response.json();
+    } catch (err) { res = null; }
 
     if (res && !res.error) {
       this.showToast('Success', 'Your leave request has been submitted.');
       e.target.reset();
       this.state.editingRequestId = null;
+      this.state.uploadedFiles = [];
+      this.renderFilePreview();
       await this.refreshAndRender();
       this.switchTab('dashboard', 'Dashboard');
     } else {
@@ -649,6 +666,81 @@ const app = {
     setTimeout(() => toast.classList.remove('show'), 3000);
   },
 
+  bindFileUpload() {
+    const zone = document.getElementById('upload-zone');
+    const input = document.getElementById('proof-file');
+    if (!zone || !input) return;
+
+    zone.addEventListener('click', () => input.click());
+
+    input.addEventListener('change', (e) => {
+      this.handleFileSelect(e.target.files);
+      e.target.value = '';
+    });
+
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', (e) => {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      this.handleFileSelect(e.dataTransfer.files);
+    });
+  },
+
+  handleFileSelect(files) {
+    const MAX = 5 * 1024 * 1024;
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    Array.from(files).forEach(file => {
+      if (!allowed.includes(file.type)) {
+        return this.showToast('Unsupported File', `${file.name} — only PDF and images are allowed.`, 'danger');
+      }
+      if (file.size > MAX) {
+        return this.showToast('File Too Large', `${file.name} exceeds the 5 MB limit.`, 'danger');
+      }
+      this.state.uploadedFiles.push(file);
+    });
+    this.renderFilePreview();
+  },
+
+  renderFilePreview() {
+    const preview = document.getElementById('upload-preview');
+    if (!preview) return;
+    if (this.state.uploadedFiles.length === 0) { preview.innerHTML = ''; return; }
+    preview.innerHTML = this.state.uploadedFiles.map((file, i) => {
+      const isImage = file.type.startsWith('image/');
+      const blobUrl = URL.createObjectURL(file);
+      const size = file.size > 1024 * 1024
+        ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+        : Math.round(file.size / 1024) + ' KB';
+      return `
+        <div class="preview-item">
+          <a href="${blobUrl}" target="_blank" class="preview-media-link" title="Click to preview">
+            ${isImage
+              ? `<img class="preview-thumb" src="${blobUrl}" alt="${file.name}">`
+              : `<div class="preview-icon-pdf"><i class="fas fa-file-pdf"></i></div>`}
+          </a>
+          <div class="preview-info">
+            <a href="${blobUrl}" target="_blank" class="preview-name-link" title="Click to preview">${file.name}</a>
+            <span class="preview-size">${size}</span>
+          </div>
+          <button class="preview-remove" type="button" onclick="app.removeFile(${i})">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+    }).join('');
+  },
+
+  removeFile(index) {
+    this.state.uploadedFiles.splice(index, 1);
+    this.renderFilePreview();
+  },
+
   bindEvents() {
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', e => {
@@ -664,6 +756,8 @@ const app = {
     document.getElementById('btn-quick-apply')?.addEventListener('click', () => {
       this.switchTab('apply-leave', 'Submit Request');
     });
+
+    this.bindFileUpload();
 
     // Profile Dropdown Toggle
     const profMenu = document.getElementById('profile-menu');
@@ -738,6 +832,8 @@ const app = {
     const req = this.state.requests.find(r => r.id == id);
     if (!req) return;
     this.state.editingRequestId = id;
+    this.state.uploadedFiles = [];
+    this.renderFilePreview();
     this.switchTab('apply-leave', 'Edit Leave');
     document.getElementById('start-date').value = req.start;
     document.getElementById('end-date').value = req.end;
@@ -747,6 +843,32 @@ const app = {
   viewRequestDetails(id) {
     const req = this.state.requests.find(r => r.id == id);
     if (!req) return;
+
+    let proofHtml = '';
+    if (req.proofFiles && req.proofFiles.length > 0) {
+      const items = req.proofFiles.map(f => {
+        const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(f);
+        const viewUrl = `uploads/${f}`;
+        const dlUrl   = `api-file-download.php?f=${encodeURIComponent(f)}`;
+        return `
+          <div class="proof-file-card">
+            ${isImg
+              ? `<a href="${viewUrl}" target="_blank" class="proof-img-link" title="Click to preview"><img src="${viewUrl}" alt="proof"></a>`
+              : `<a href="${viewUrl}" target="_blank" class="proof-pdf-link" title="Click to open"><i class="fas fa-file-pdf"></i><span>${f}</span></a>`}
+            <a href="${dlUrl}" class="proof-download-btn" title="Download file">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </div>
+        `;
+      }).join('');
+      proofHtml = `
+        <div class="proof-files-section">
+          <span class="proof-files-label"><i class="fas fa-paperclip"></i> Attachments</span>
+          <div class="proof-files-grid">${items}</div>
+        </div>
+      `;
+    }
+
     const content = `
       <div class="modal-badge-row">
         <span class="badge status-${req.status.toLowerCase()}">${req.status}</span>
@@ -756,6 +878,7 @@ const app = {
       <div class="detail-row"><span>Period</span><strong>${req.start} to ${req.end}</strong></div>
       <div class="detail-row"><span>Duration</span><strong>${req.duration} Days</strong></div>
       <div class="detail-row"><span>Reason</span><strong>${req.reason || 'No reason provided'}</strong></div>
+      ${proofHtml}
       ${req.comment ? `<div class="approver-comment-box">
           <span class="comment-label">Manager's Comment</span>
           <p class="comment-text">${req.comment}</p>

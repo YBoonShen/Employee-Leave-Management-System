@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=15">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="role-employee">
@@ -203,6 +203,16 @@
                                     <div class="form-group"><label>Start Date</label><input type="date" id="start-date" required></div>
                                     <div class="form-group"><label>End Date</label><input type="date" id="end-date" required></div>
                                     <div class="form-group full-width"><label>Reason</label><textarea id="reason" rows="3"></textarea></div>
+                                    <div class="form-group full-width">
+                                        <label><i class="fas fa-paperclip"></i> Supporting Documents <span style="font-weight:400; color:var(--text-sub); font-size:0.85rem;">(Optional — MC, PDF, Image)</span></label>
+                                        <div class="upload-zone" id="upload-zone">
+                                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                            <p class="upload-title">Drop files here or <span class="upload-link">click to browse</span></p>
+                                            <p class="upload-hint">PDF, JPG, PNG &middot; Max 5 MB per file &middot; Medical certificates, proof documents</p>
+                                            <input type="file" id="proof-file" accept=".pdf,.jpg,.jpeg,.png,.gif" style="display:none" multiple>
+                                        </div>
+                                        <div id="upload-preview" class="upload-preview-list"></div>
+                                    </div>
                                 </div>
                                 <div class="form-footer"><button type="submit" class="btn btn-primary">Submit Application</button></div>
                             </form>
@@ -237,7 +247,7 @@
 
                 <section id="manager-approvals" class="page-section">
                     <div class="table-card"><div class="card-header"><h2>Approvals</h2></div>
-                        <div class="table-container"><table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Duration</th><th>Action</th></tr></thead><tbody id="manager-table-body"></tbody></table></div>
+                        <div class="table-container"><table class="data-table"><thead><tr><th>Employee</th><th>Type</th><th>Duration</th><th>Proof</th><th>Action</th></tr></thead><tbody id="manager-table-body"></tbody></table></div>
                     </div>
                 </section>
                 
@@ -261,6 +271,6 @@
     <div id="detail-modal" class="modal-overlay"><div class="modal-card"><div class="modal-header"><h3>Details</h3><button onclick="app.closeModal()">&times;</button></div><div class="modal-body" id="modal-content"></div></div></div>
     <div id="toast" class="toast"><div class="toast-content"><div class="message"><span class="toast-title" id="toast-title"></span><span class="toast-desc" id="toast-desc"></span></div></div></div>
     
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=16"></script>
 </body>
 </html>
