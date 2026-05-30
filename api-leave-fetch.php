@@ -1,4 +1,6 @@
 <?php
+// Returns the current user's data and leave requests.
+// Managers can pass ?user_id=X to fetch any employee's records.
 session_start();
 require __DIR__ . '/config.php';
 
@@ -12,9 +14,12 @@ if (empty($_SESSION['user_id'])) {
 
 try {
     $db = get_db_connection();
-    
-    // MIGRATION: Ensure allowance column exists (default 21 days)
-    $db->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS allowance INT DEFAULT 21");
+
+    // MIGRATION: Ensure columns exist (compatible with MySQL 5.7+)
+    $cols = $db->query("SHOW COLUMNS FROM users LIKE 'allowance'")->fetchAll();
+    if (empty($cols)) $db->exec("ALTER TABLE users ADD COLUMN allowance INT DEFAULT 21");
+    $cols2 = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'proof_files'")->fetchAll();
+    if (empty($cols2)) $db->exec("ALTER TABLE leave_requests ADD COLUMN proof_files TEXT NULL");
     
     $currentId = $_SESSION['user_id'];
     $currentRole = $_SESSION['role'] ?? 'employee';
@@ -73,6 +78,7 @@ try {
             'status' => $r['status'],
             'comment' => $r['manager_comment'] ?? '',
             'date' => substr($r['created_at'], 0, 10),
+            'proofFiles' => !empty($r['proof_files']) ? json_decode($r['proof_files'], true) : [],
         ];
     }, $rows);
 

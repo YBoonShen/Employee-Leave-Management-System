@@ -1,4 +1,5 @@
 <?php
+// Updates a pending leave request. Replaces files if new ones are uploaded.
 session_start();
 require __DIR__ . '/config.php';
 header('Content-Type: application/json');

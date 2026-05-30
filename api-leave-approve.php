@@ -1,4 +1,5 @@
 <?php
+// Manager-only endpoint — approves or rejects a leave request and notifies the employee.
 session_start();
 require __DIR__ . '/config.php';
 
@@ -44,8 +45,9 @@ try {
         exit;
     }
 
-    // Ensure manager_comment column exists
-    $db->exec("ALTER TABLE leave_requests ADD COLUMN IF NOT EXISTS manager_comment TEXT");
+    // Add manager_comment column if missing (MySQL 5.7 compatible)
+    $cols = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'manager_comment'")->fetchAll();
+    if (empty($cols)) $db->exec("ALTER TABLE leave_requests ADD COLUMN manager_comment TEXT");
 
     $stmt = $db->prepare('UPDATE leave_requests SET status = :status, manager_comment = :comment, updated_at = NOW() WHERE id = :id');
     $stmt->execute([

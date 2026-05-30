@@ -1,4 +1,5 @@
 <?php
+// Handles submitting a new leave request (multipart/form-data with optional file uploads).
 session_start();
 require __DIR__ . '/config.php';
 

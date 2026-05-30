@@ -1,4 +1,6 @@
 <?php
+// Validates login credentials and starts the session.
+// Also seeds the manager account on first run if it doesn't exist yet.
 session_start();
 require __DIR__ . '/config.php';
 

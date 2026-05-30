@@ -1,4 +1,5 @@
 <?php
+// Creates a new employee account. All new sign-ups get the 'employee' role.
 session_start();
 require __DIR__ . '/config.php';
 
@@ -25,10 +26,11 @@ if ($name === '' || $employeeId === '' || $email === '' || $password === '') {
 try {
     $db = get_db_connection();
 
-    // Ensure columns exist (migration for local dev)
-    $db->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20), 
-               ADD COLUMN IF NOT EXISTS job_title VARCHAR(100), 
-               ADD COLUMN IF NOT EXISTS location VARCHAR(150)");
+    // Add optional profile columns if they don't exist yet (MySQL 5.7 compatible)
+    $existing = array_column($db->query("SHOW COLUMNS FROM users")->fetchAll(), 'Field');
+    if (!in_array('phone',     $existing)) $db->exec("ALTER TABLE users ADD COLUMN phone     VARCHAR(20)");
+    if (!in_array('job_title', $existing)) $db->exec("ALTER TABLE users ADD COLUMN job_title VARCHAR(100)");
+    if (!in_array('location',  $existing)) $db->exec("ALTER TABLE users ADD COLUMN location  VARCHAR(150)");
     
     // Check if email or employee_id already exists
     $checkStmt = $db->prepare('SELECT id FROM users WHERE email = :email OR employee_id = :emp LIMIT 1');
