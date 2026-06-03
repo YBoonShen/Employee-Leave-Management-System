@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS leave_requests (
     reason TEXT,
     manager_comment TEXT,
     status ENUM('Pending','Approved','Rejected') DEFAULT 'Pending',
+    proof_files TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     CONSTRAINT fk_leave_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
