@@ -428,8 +428,82 @@ const app = {
     if (id === 'profile')       this.renderProfile();
     if (id === 'team-overview') this.loadUsers();
     if (id === 'notifications') this.loadNotifications();
+    if (id === 'reports')       this.loadReport();
 
     this.renderTables();
+  },
+
+  /* ─── Manager: Reports ─── */
+
+  async loadReport() {
+    if (this.state.role !== 'manager') return;
+
+    const status = document.getElementById('rpt-filter-status')?.value || '';
+    const type   = document.getElementById('rpt-filter-type')?.value   || '';
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    if (type)   params.set('type', type);
+
+    const data = await this.fetchAPI('api-report-fetch.php?' + params.toString());
+    if (!data) return;
+
+    // ── Summary stats ─────────────────────────────────────
+    const s = data.summary;
+    document.getElementById('rpt-total').textContent    = s.total    || 0;
+    document.getElementById('rpt-approved').textContent = s.approved || 0;
+    document.getElementById('rpt-pending').textContent  = s.pending  || 0;
+    document.getElementById('rpt-rejected').textContent = s.rejected || 0;
+
+    // ── Bar chart helper ──────────────────────────────────
+    function barChart(containerId, rows, labelKey, valueKey, colorMap) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const max = Math.max(...rows.map(r => Number(r[valueKey]) || 0), 1);
+      const colors = { Annual:'#4f46e5', Sick:'#22c55e', Unpaid:'#f59e0b', default:'#6366f1' };
+      el.innerHTML = rows.map(r => {
+        const val  = Number(r[valueKey]) || 0;
+        const pct  = Math.round((val / max) * 100);
+        const color = colorMap?.[r[labelKey]] || colors[r[labelKey]] || colors.default;
+        return `<div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:0.85rem;font-weight:500;color:var(--text-main);">${r[labelKey]}</span>
+            <span style="font-size:0.85rem;color:var(--text-sub);">${val} days</span>
+          </div>
+          <div style="background:#f1f5f9;border-radius:6px;height:10px;overflow:hidden;">
+            <div style="width:${pct}%;background:${color};height:100%;border-radius:6px;transition:width 0.4s;"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    barChart('rpt-type-bars', data.byType, 'leave_type', 'days');
+    barChart('rpt-dept-bars', data.byDept, 'department', 'days', {});
+
+    // ── Records table ─────────────────────────────────────
+    const statusBadge = s => {
+      const m = {Approved:'badge-approved', Pending:'badge-pending', Rejected:'badge-rejected'};
+      return `<span class="status-badge ${m[s]||''}">${s}</span>`;
+    };
+    const tbody = document.getElementById('rpt-records-body');
+    if (!tbody) return;
+    if (!data.records?.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.records.map(r => {
+      const start = r.start_date ? new Date(r.start_date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      const end   = r.end_date   ? new Date(r.end_date  +'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      const applied = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<tr>
+        <td><strong>${r.name}</strong><br><span style="font-size:0.78rem;color:var(--text-sub);">${r.employee_id}</span></td>
+        <td>${r.department || '—'}</td>
+        <td>${r.leave_type}</td>
+        <td style="font-size:0.85rem;">${start} – ${end}</td>
+        <td>${r.duration} day${r.duration!=1?'s':''}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td style="font-size:0.85rem;color:var(--text-sub);">${applied}</td>
+      </tr>`;
+    }).join('');
   },
 
   /* ─── Manager: User Management ─── */
@@ -778,28 +852,30 @@ const app = {
 
         <div class="profile-card">
           <div class="profile-header-bg"></div>
-          <div class="profile-main-info">
+          <div class="profile-identity-wrap">
             <div class="profile-avatar-large">${this.getInitials(u.name)}</div>
-            <div class="profile-title-group">
-              <h2>${u.name}</h2>
-              <span class="job-badge">${u.role.toUpperCase()}</span>
-              ${this.getEtypeCard(u.employment_type)}
+            <div class="profile-identity-info">
+              <h2 class="profile-display-name">${u.name}</h2>
+              <div class="profile-badge-row">
+                <span class="profile-info-pill"><i class="fas fa-user-tie"></i> Title: ${u.role.charAt(0).toUpperCase() + u.role.slice(1)}</span>
+                <span class="profile-info-pill"><i class="fas fa-user-tag"></i> Employment: ${u.employment_type || 'Permanent'}</span>
+              </div>
             </div>
           </div>
           <div class="profile-info-sections">
             <div class="info-block">
               <span class="section-label">Employment & Contact Details</span>
               <div class="info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                <div class="info-item"><i class="fas fa-user"></i>       <div class="info-content"><span>Full Name</span>       <strong>${u.name}</strong></div></div>
-                <div class="info-item"><i class="fas fa-envelope"></i>   <div class="info-content"><span>Work Email</span>      <strong>${u.email}</strong></div></div>
-                <div class="info-item"><i class="fas fa-id-card"></i>    <div class="info-content"><span>Employee ID</span>     <strong>${u.employee_id}</strong></div></div>
-                <div class="info-item"><i class="fas fa-building"></i>   <div class="info-content"><span>Department</span>     <strong>${u.department || 'N/A'}</strong></div></div>
-                <div class="info-item"><i class="fas fa-phone"></i>      <div class="info-content"><span>Phone Number</span>   <strong>${u.phone      || 'N/A'}</strong></div></div>
-                <div class="info-item"><i class="fas fa-briefcase"></i>  <div class="info-content"><span>Job Title</span>     <strong>${u.job_title  || 'N/A'}</strong></div></div>
-                <div class="info-item"><i class="fas fa-map-marker-alt"></i><div class="info-content"><span>Location</span>   <strong>${u.location   || 'N/A'}</strong></div></div>
-                <div class="info-item"><i class="fas fa-user-tag"></i>   <div class="info-content"><span>Employment Type</span><strong>${this.getEtypeBadge(u.employment_type)}</strong></div></div>
-                <div class="info-item"><i class="fas fa-calendar-day"></i><div class="info-content"><span>Join Date</span>       <strong>${u.join_date ? new Date(u.join_date + 'T00:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : 'N/A'}</strong></div></div>
-                <div class="info-item"><i class="fas fa-history"></i>    <div class="info-content"><span>Years of Service</span> <strong>${this.getYearsOfService(u.join_date)}</strong></div></div>
+                <div class="info-item"><i class="fas fa-user"></i>          <div class="info-content"><span>Full Name</span>        <strong>${u.name}</strong></div></div>
+                <div class="info-item"><i class="fas fa-envelope"></i>      <div class="info-content"><span>Work Email</span>       <strong>${u.email}</strong></div></div>
+                <div class="info-item"><i class="fas fa-id-card"></i>       <div class="info-content"><span>Employee ID</span>      <strong>${u.employee_id}</strong></div></div>
+                <div class="info-item"><i class="fas fa-building"></i>      <div class="info-content"><span>Department</span>      <strong>${u.department || 'N/A'}</strong></div></div>
+                <div class="info-item"><i class="fas fa-phone"></i>         <div class="info-content"><span>Phone Number</span>    <strong>${u.phone      || 'N/A'}</strong></div></div>
+                <div class="info-item"><i class="fas fa-briefcase"></i>     <div class="info-content"><span>Job Title</span>      <strong>${u.job_title  || 'N/A'}</strong></div></div>
+                <div class="info-item"><i class="fas fa-map-marker-alt"></i><div class="info-content"><span>Location</span>      <strong>${u.location   || 'N/A'}</strong></div></div>
+                <div class="info-item"><i class="fas fa-calendar-day"></i>  <div class="info-content"><span>Join Date</span>      <strong>${u.join_date ? new Date(u.join_date + 'T00:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : 'N/A'}</strong></div></div>
+                <div class="info-item"><i class="fas fa-history"></i>       <div class="info-content"><span>Years of Service</span><strong>${this.getYearsOfService(u.join_date)}</strong></div></div>
+                <div class="info-item"><i class="fas fa-user-tag"></i>      <div class="info-content"><span>Employment Type</span> <strong>${u.employment_type || 'N/A'}</strong></div></div>
               </div>
             </div>
           </div>
