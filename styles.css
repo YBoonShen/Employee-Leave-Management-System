@@ -75,26 +75,20 @@ input:focus {
 .info-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
-  background: #eff6ff;
-  border-radius: 14px;
-  padding: 14px 16px;
-  border: 1px solid #dbeafe;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .info-item i {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  background: #fff;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  background: #f8fafc;
+  color: var(--primary);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
-  font-size: 1rem;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
@@ -789,6 +783,30 @@ select {
   background: var(--primary);
   color: #fff;
 }
+
+/* Password show/hide toggle */
+.pw-input-wrap {
+  position: relative;
+}
+.pw-input-wrap input {
+  padding-right: 42px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.pw-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  padding: 4px;
+  line-height: 1;
+}
+.pw-toggle-btn:hover { color: var(--primary); }
 
 /* Toast */
 .toast {
@@ -1848,26 +1866,20 @@ select {
 .info-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
-  background: #eff6ff;
-  border-radius: 14px;
-  padding: 14px 16px;
-  border: 1px solid #dbeafe;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .info-item i {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  background: #fff;
+  width: 36px;
+  height: 36px;
+  background: #f1f5f9;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
-  font-size: 1rem;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
+  color: var(--secondary);
+  font-size: 0.9rem;
 }
 
 .info-content span {
@@ -2552,6 +2564,42 @@ td:has(.employee-cell) {
 .emp-badge-blue   { background: #dbeafe; color: #1d4ed8; }
 .emp-badge-amber  { background: #fef3c7; color: #b45309; }
 .emp-badge-purple { background: #ede9fe; color: #6d28d9; }
+
+/* ── Employment Type card (profile header only) ── */
+.etype-profile-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 8px 14px 8px 8px;
+}
+.etype-profile-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 0.95rem;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.1);
+}
+.etype-profile-text span {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-sub);
+  line-height: 1.2;
+}
+.etype-profile-text strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
 
 /* ── Employment Type inline badge (profile & tables) ── */
 .etype-badge {

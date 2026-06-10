@@ -57,7 +57,10 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-col">
                         <label>Password</label>
-                        <input type="password" name="password" id="reg-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                        <div class="pw-input-wrap">
+                            <input type="password" name="password" id="reg-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                            <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+                        </div>
                         <div class="password-strength" id="reg-pw-strength"></div>
                     </div>
                 </div>
@@ -109,7 +112,7 @@ if (isset($_SESSION['user_id'])) {
                                 <span class="emp-type-name">Permanent</span>
                                 <span class="emp-type-desc">Full-time, indefinite employment</span>
                             </div>
-                            <span class="emp-type-badge emp-badge-blue">14 days / year</span>
+                            <span class="emp-type-badge emp-badge-blue">8 – 16 days / year</span>
                         </label>
 
                         <input type="radio" name="employment_type" id="etype-contract" value="Contract">
@@ -121,7 +124,7 @@ if (isset($_SESSION['user_id'])) {
                                 <span class="emp-type-name">Contract</span>
                                 <span class="emp-type-desc">Fixed-term employment agreement</span>
                             </div>
-                            <span class="emp-type-badge emp-badge-amber">8 days / year</span>
+                            <span class="emp-type-badge emp-badge-amber">8 – 16 days / year</span>
                         </label>
 
                         <input type="radio" name="employment_type" id="etype-parttime" value="Part-Time">
@@ -133,7 +136,7 @@ if (isset($_SESSION['user_id'])) {
                                 <span class="emp-type-name">Part-Time</span>
                                 <span class="emp-type-desc">Reduced hours, flexible schedule</span>
                             </div>
-                            <span class="emp-type-badge emp-badge-purple">8 days / year</span>
+                            <span class="emp-type-badge emp-badge-purple">4 – 8 days / year</span>
                         </label>
 
                     </div>
@@ -149,6 +152,18 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+        function togglePw(btn) {
+            const input = btn.closest('.pw-input-wrap').querySelector('input');
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
         // Show live password strength feedback
         document.getElementById('reg-password').addEventListener('input', function () {
             document.getElementById('reg-pw-strength').innerHTML = getStrengthBar(this.value);

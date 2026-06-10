@@ -48,7 +48,10 @@ if (isset($_SESSION['user_id'])) {
                         <label>Password</label>
                         <button type="button" class="auth-forgot-link" onclick="showStep('forgot-step1')">Forgot password?</button>
                     </div>
-                    <input type="password" name="password" placeholder="••••••••" required>
+                    <div class="pw-input-wrap">
+                        <input type="password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+                    </div>
                     <button type="submit" class="btn btn-primary full-width">Sign In</button>
                 </form>
 
@@ -89,10 +92,16 @@ if (isset($_SESSION['user_id'])) {
 
                 <form class="auth-form" onsubmit="handleResetPassword(event)">
                     <label>New Password</label>
-                    <input type="password" id="new-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                    <div class="pw-input-wrap">
+                        <input type="password" id="new-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                        <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+                    </div>
                     <div class="password-strength" id="reset-pw-strength"></div>
                     <label>Confirm Password</label>
-                    <input type="password" id="confirm-password" placeholder="Repeat new password" required>
+                    <div class="pw-input-wrap">
+                        <input type="password" id="confirm-password" placeholder="Repeat new password" required>
+                        <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+                    </div>
                     <button type="submit" class="btn btn-primary full-width" id="step2-btn">
                         <span id="step2-btn-text"><i class="fas fa-lock"></i> Reset Password</span>
                         <span id="step2-btn-loading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></span>
@@ -116,6 +125,18 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+        function togglePw(btn) {
+            const input = btn.closest('.pw-input-wrap').querySelector('input');
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
         // Returns an error string if password is weak, or null if it passes
         function checkPassword(pw) {
             if (pw.length < 6)            return 'Password must be at least 6 characters.';

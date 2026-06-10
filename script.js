@@ -2,6 +2,18 @@
    NexusLeave  —  Front-end Application Logic
    ───────────────────────────────────────────── */
 
+function togglePw(btn) {
+  const input = btn.closest('.pw-input-wrap').querySelector('input');
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
 /* ─── API endpoint map ─── */
 const API = {
   GET_REQUESTS:        'api-leave-fetch.php',
@@ -39,9 +51,19 @@ const app = {
   /* ─── Bootstrap ─── */
 
   async init() {
-    const today = new Date().toISOString().split('T')[0];
+    const now   = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     document.getElementById('start-date')?.setAttribute('min', today);
     document.getElementById('end-date')?.setAttribute('min', today);
+
+    // When start date changes, update end-date min to match (allow same day)
+    document.getElementById('start-date')?.addEventListener('change', function () {
+      const endInput = document.getElementById('end-date');
+      endInput.min = this.value;
+      if (endInput.value && endInput.value < this.value) {
+        endInput.value = this.value;
+      }
+    });
 
     if (window.NEXUS_USER) {
       this.state.currentUser.name        = window.NEXUS_USER.name;
@@ -727,6 +749,20 @@ const app = {
     return `<span class="etype-badge ${cfg.css}"><i class="fas ${cfg.icon}"></i>${cfg.label}</span>`;
   },
 
+  // Returns a horizontal card for employment type (used in profile view only)
+  getEtypeCard(etype) {
+    const map = {
+      'Permanent': { icon: 'fa-user-tie' },
+      'Contract':  { icon: 'fa-file-contract' },
+      'Part-Time': { icon: 'fa-clock' },
+    };
+    const cfg = map[etype] || { icon: 'fa-user-tie' };
+    return `<div class="etype-profile-card">
+      <div class="etype-profile-icon"><i class="fas ${cfg.icon}"></i></div>
+      <div class="etype-profile-text"><span>Employment Type</span><strong>${etype || 'Permanent'}</strong></div>
+    </div>`;
+  },
+
   renderProfile() {
     const u         = this.state.currentUser;
     const container = document.getElementById('profile-content');
@@ -747,7 +783,7 @@ const app = {
             <div class="profile-title-group">
               <h2>${u.name}</h2>
               <span class="job-badge">${u.role.toUpperCase()}</span>
-              ${this.getEtypeBadge(u.employment_type)}
+              ${this.getEtypeCard(u.employment_type)}
             </div>
           </div>
           <div class="profile-info-sections">
@@ -1020,9 +1056,9 @@ const app = {
   showPasswordModal() {
     document.getElementById('modal-content').innerHTML = `
       <form onsubmit="app.handlePasswordChange(event)">
-        <div class="form-group"><label>Current Password</label>     <input type="password" name="current" required></div>
-        <div class="form-group"><label>New Password</label>         <input type="password" name="new"     required></div>
-        <div class="form-group"><label>Confirm New Password</label> <input type="password" name="confirm" required></div>
+        <div class="form-group"><label>Current Password</label><div class="pw-input-wrap"><input type="password" name="current" required><button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button></div></div>
+        <div class="form-group"><label>New Password</label><div class="pw-input-wrap"><input type="password" name="new" required><button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button></div></div>
+        <div class="form-group"><label>Confirm New Password</label><div class="pw-input-wrap"><input type="password" name="confirm" required><button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button></div></div>
         <div class="form-footer">
           <button type="submit" class="btn btn-primary">Update Password</button>
         </div>
