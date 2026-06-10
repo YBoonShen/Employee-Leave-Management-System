@@ -77,7 +77,7 @@ try {
             'type' => $r['type'],
             'start' => $r['start_date'],
             'end' => $r['end_date'],
-            'duration' => (int)$r['duration_days'],
+            'duration' => (int)$r['duration'],
             'reason' => $r['reason'],
             'status' => $r['status'],
             'comment' => $r['manager_comment'] ?? '',

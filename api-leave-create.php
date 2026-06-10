@@ -78,7 +78,7 @@ try {
     $userStmt->execute([':uid' => $userId]);
     $allowance = (int)$userStmt->fetchColumn();
 
-    $takenStmt = $db->prepare('SELECT SUM(duration_days) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
+    $takenStmt = $db->prepare('SELECT SUM(duration) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
     $takenStmt->execute([':uid' => $userId]);
     $taken = (int)$takenStmt->fetchColumn();
 
@@ -88,7 +88,7 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration_days, reason, proof_files)
+    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration, reason, proof_files)
                           VALUES (:uid, :type, :start, :end, :duration, :reason, :proof)');
     $stmt->execute([
         ':uid'    => $userId,
