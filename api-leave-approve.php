@@ -39,7 +39,7 @@ try {
     }
 
     // Prevent self-approval
-    if ($owner['user_id'] == $_SESSION['user_id']) {
+    if ((int)$owner['user_id'] === (int)$_SESSION['user_id']) {
         http_response_code(403);
         echo json_encode(['error' => 'You cannot approve or reject your own leave requests.']);
         exit;

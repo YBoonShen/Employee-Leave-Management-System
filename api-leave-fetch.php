@@ -20,6 +20,10 @@ try {
     if (empty($cols)) $db->exec("ALTER TABLE users ADD COLUMN allowance INT DEFAULT 21");
     $cols2 = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'proof_files'")->fetchAll();
     if (empty($cols2)) $db->exec("ALTER TABLE leave_requests ADD COLUMN proof_files TEXT NULL");
+    $cols3 = $db->query("SHOW COLUMNS FROM users LIKE 'employment_type'")->fetchAll();
+    if (empty($cols3)) $db->exec("ALTER TABLE users ADD COLUMN employment_type ENUM('Permanent','Contract','Part-Time') DEFAULT 'Permanent'");
+    $cols4 = $db->query("SHOW COLUMNS FROM users LIKE 'join_date'")->fetchAll();
+    if (empty($cols4)) $db->exec("ALTER TABLE users ADD COLUMN join_date DATE NULL");
     
     $currentId = $_SESSION['user_id'];
     $currentRole = $_SESSION['role'] ?? 'employee';
@@ -35,7 +39,7 @@ try {
     }
 
     // Get the target user info
-    $userStmt = $db->prepare('SELECT id, name, employee_id, role, department, phone, job_title, location, email, allowance FROM users WHERE id = :id LIMIT 1');
+    $userStmt = $db->prepare('SELECT id, name, employee_id, role, department, phone, job_title, location, email, allowance, employment_type, join_date FROM users WHERE id = :id LIMIT 1');
     $userStmt->execute([':id' => $targetId]);
     $user = $userStmt->fetch();
 

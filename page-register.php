@@ -84,6 +84,61 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Join Date</label>
+                        <!-- Used to calculate leave tier under Malaysia Employment Act 1955 -->
+                        <input type="date" name="join_date" id="reg-join-date" max="<?= date('Y-m-d') ?>" required>
+                        <span class="field-hint">Your first official day of employment</span>
+                    </div>
+                    <div class="form-col"></div>
+                </div>
+
+                <!-- Employment type card selector -->
+                <div class="form-group-full">
+                    <label class="emp-type-label">Employment Type</label>
+                    <p class="emp-type-sublabel">Select your employment status. This determines your annual leave entitlement.</p>
+                    <div class="emp-type-grid">
+
+                        <input type="radio" name="employment_type" id="etype-permanent" value="Permanent" checked>
+                        <label for="etype-permanent" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-blue">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Permanent</span>
+                                <span class="emp-type-desc">Full-time, indefinite employment</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-blue">14 days / year</span>
+                        </label>
+
+                        <input type="radio" name="employment_type" id="etype-contract" value="Contract">
+                        <label for="etype-contract" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-amber">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Contract</span>
+                                <span class="emp-type-desc">Fixed-term employment agreement</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-amber">8 days / year</span>
+                        </label>
+
+                        <input type="radio" name="employment_type" id="etype-parttime" value="Part-Time">
+                        <label for="etype-parttime" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-purple">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Part-Time</span>
+                                <span class="emp-type-desc">Reduced hours, flexible schedule</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-purple">8 days / year</span>
+                        </label>
+
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary full-width">Create Account</button>
             </form>
 

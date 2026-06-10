@@ -163,6 +163,9 @@
                         </div>
                     </div>
 
+                    <!-- Employment overview card — populated by renderEmploymentCard() -->
+                    <div id="emp-overview-section" class="employee-only" style="margin-bottom:24px;"></div>
+
                     <div class="table-card employee-only">
                         <div class="card-header">
                             <h2>Latest Activity</h2>
@@ -252,7 +255,7 @@
                 </section>
                 
                 <section id="team-overview" class="page-section">
-                    <div class="table-card"><div class="card-header"><h2>Users</h2></div><div class="table-container"><table class="data-table"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Dept</th><th>Action</th></tr></thead><tbody id="user-management-table-body"></tbody></table></div></div>
+                    <div class="table-card"><div class="card-header"><h2>Users</h2></div><div class="table-container"><table class="data-table"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Dept</th><th>Type</th><th>Service</th><th>Action</th></tr></thead><tbody id="user-management-table-body"></tbody></table></div></div>
                 </section>
 
                 <section id="notifications" class="page-section">

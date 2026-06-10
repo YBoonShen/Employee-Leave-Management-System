@@ -2415,3 +2415,307 @@ select {
 td:has(.employee-cell) {
   min-width: 260px !important;
 }
+
+/* ── Employment Type Card Selector (Register page) ── */
+.form-group-full {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emp-type-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: block;
+}
+
+.emp-type-sublabel {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  margin: 0 0 10px;
+}
+
+.emp-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Hide native radio inputs */
+.emp-type-grid input[type="radio"] {
+  display: none;
+}
+
+.emp-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 18px 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.emp-type-card:hover {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.1);
+}
+
+/* Selected state — triggered when the hidden radio is checked */
+.emp-type-grid input[type="radio"]:checked + .emp-type-card {
+  border-color: var(--primary);
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Checkmark indicator */
+.emp-type-grid input[type="radio"]:checked + .emp-type-card::after {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emp-type-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.emp-type-blue   { background: #dbeafe; color: #2563eb; }
+.emp-type-amber  { background: #fef3c7; color: #d97706; }
+.emp-type-purple { background: #ede9fe; color: #7c3aed; }
+
+.emp-type-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.emp-type-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.emp-type-desc {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+.emp-type-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.emp-badge-blue   { background: #dbeafe; color: #1d4ed8; }
+.emp-badge-amber  { background: #fef3c7; color: #b45309; }
+.emp-badge-purple { background: #ede9fe; color: #6d28d9; }
+
+/* ── Employment Type inline badge (profile & tables) ── */
+.etype-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.etype-permanent { background: #dbeafe; color: #1d4ed8; }
+.etype-contract  { background: #fef3c7; color: #b45309; }
+.etype-parttime  { background: #ede9fe; color: #6d28d9; }
+
+/* ── Employment Overview Card (employee dashboard) ── */
+.emp-overview-card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.emp-overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.emp-overview-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.emp-overview-title i {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.emp-overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.emp-ov-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 24px;
+  border-right: 1px solid var(--border);
+}
+
+.emp-ov-stat:last-child {
+  border-right: none;
+}
+
+.emp-ov-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emp-ov-label i {
+  font-size: 0.7rem;
+}
+
+.emp-ov-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.emp-tier-block {
+  padding: 16px 24px 20px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+}
+
+.emp-tier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.emp-tier-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-right: 8px;
+}
+
+.emp-tier-desc {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+
+.emp-tier-next {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.emp-tier-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.emp-tier-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.emp-tier-note {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emp-tier-note i {
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+.emp-tier-note strong {
+  color: var(--primary);
+}
+
+/* Allowance edit area inside manager modal */
+.allowance-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.allowance-edit-row input[type="number"] {
+  width: 80px !important;
+  padding: 6px 10px !important;
+  font-size: 0.88rem !important;
+  border-radius: 8px !important;
+}
+
+/* ── Employment Type select in profile edit form ── */
+.emp-type-select-wrap {
+  position: relative;
+}
+
+.emp-type-select-wrap select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px !important;
+}
