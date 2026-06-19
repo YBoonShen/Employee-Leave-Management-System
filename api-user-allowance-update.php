@@ -31,7 +31,7 @@ try {
 
     // Reject if new allowance is less than days already approved
     $takenStmt = $db->prepare(
-        "SELECT COALESCE(SUM(duration), 0) FROM leave_requests WHERE user_id = :uid AND status = 'Approved'"
+        "SELECT COALESCE(SUM(duration_days), 0) FROM leave_requests WHERE user_id = :uid AND status = 'Approved'"
     );
     $takenStmt->execute([':uid' => $userId]);
     $taken = (int)$takenStmt->fetchColumn();

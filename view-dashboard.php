@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=24">
+    <link rel="stylesheet" href="styles.css?v=25">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="role-employee">
@@ -337,10 +337,6 @@
     <div id="detail-modal" class="modal-overlay"><div class="modal-card"><div class="modal-header"><h3>Details</h3><button onclick="app.closeModal()">&times;</button></div><div class="modal-body" id="modal-content"></div></div></div>
     <div id="toast" class="toast"><div class="toast-content"><div class="message"><span class="toast-title" id="toast-title"></span><span class="toast-desc" id="toast-desc"></span></div></div></div>
     
-<<<<<<<<< Temporary merge branch 1
-    <script src="script.js?v=16"></script>
-=========
-    <script src="script.js?v=17"></script>
->>>>>>>>> Temporary merge branch 2
+    <script src="script.js?v=21"></script>
 </body>
 </html>

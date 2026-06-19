@@ -109,7 +109,7 @@ input:focus {
 .profile-edit-card {
   background: #fff;
   border-radius: 16px;
-  padding: 32px; /* Increased padding */
+  padding: 28px;
   box-shadow: var(--shadow-md);
 }
 
@@ -228,7 +228,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 13px;
+  border-left: 3px solid transparent;
   text-decoration: none;
   color: #94a3b8;
   border-radius: 8px;
@@ -236,6 +237,13 @@ body {
   font-weight: 500;
   transition: all 0.2s;
 }
+
+.nav-item i {
+  width: 18px;
+  flex: 0 0 18px;
+  text-align: center;
+}
+
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #e2e8f0;
@@ -243,8 +251,7 @@ body {
 .nav-item.active {
   background: rgba(37, 99, 235, 0.18);
   color: #93c5fd;
-  box-shadow: inset 3px 0 0 #2563eb;
-  padding-left: 13px;
+  border-left-color: #2563eb;
 }
 
 .badge-count {
@@ -325,14 +332,15 @@ body.role-manager .employee-only {
 }
 
 .topbar {
-  height: 80px;
+  height: auto;
+  min-height: 80px;
   background: rgba(255, 252, 248, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
+  padding: 16px 68px;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -340,10 +348,12 @@ body.role-manager .employee-only {
 
 .page-title h1 {
   font-size: 1.5rem;
+  line-height: 1.2;
   font-weight: 700;
   color: #0f172a;
 }
 .page-subheading {
+  margin-top: 2px;
   font-size: 0.9rem;
   color: var(--text-sub);
 }
@@ -411,7 +421,21 @@ select {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.topbar-actions .icon-btn,
+.topbar-actions > .btn,
+.topbar-actions .profile-menu {
+  height: 40px;
+}
+
+.topbar-actions > .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-box {
@@ -508,6 +532,7 @@ select {
 .content-area {
   padding: 40px;
 }
+
 .page-section {
   display: none;
 }
@@ -755,6 +780,7 @@ select {
   margin-bottom: 32px;
   text-align: center;
 }
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -849,12 +875,21 @@ select {
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-  transform: translateX(120%);
-  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(calc(100% + 48px));
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease,
+    transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
   z-index: 1000;
   border-left: 5px solid var(--success);
 }
 .toast.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
   transform: translateX(0);
 }
 .toast-content {
