@@ -10,6 +10,12 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit;
+}
+
 $requestId = (int)($_POST['id'] ?? 0);
 
 try {
@@ -20,8 +26,20 @@ try {
     $start    = $_POST['start'] ?? '';
     $end      = $_POST['end']   ?? '';
 
+    if ($duration <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Duration must be at least 1 day.']);
+        exit;
+    }
+
+    if ($start > $end) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Start date cannot be after end date.']);
+        exit;
+    }
+
     // 1. Check if it belongs to user and is still Pending
-    $check = $db->prepare('SELECT status, duration_days FROM leave_requests WHERE id = :id AND user_id = :uid');
+    $check = $db->prepare('SELECT status, duration FROM leave_requests WHERE id = :id AND user_id = :uid');
     $check->execute([':id' => $requestId, ':uid' => $userId]);
     $req = $check->fetch();
 
@@ -45,7 +63,7 @@ try {
     $userStmt->execute([':uid' => $userId]);
     $allowance = (int)$userStmt->fetchColumn();
 
-    $takenStmt = $db->prepare('SELECT SUM(duration_days) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
+    $takenStmt = $db->prepare('SELECT SUM(duration) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
     $takenStmt->execute([':uid' => $userId]);
     $taken = (int)$takenStmt->fetchColumn();
 
@@ -85,7 +103,7 @@ try {
         }
         $proofFiles = !empty($savedFiles) ? json_encode($savedFiles) : null;
 
-        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, proof_files = :proof, updated_at = NOW() WHERE id = :id');
+        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration = :duration, reason = :reason, proof_files = :proof, updated_at = NOW() WHERE id = :id');
         $stmt->execute([
             ':type'     => $_POST['type'] ?? 'Annual',
             ':start'    => $start,
@@ -96,7 +114,7 @@ try {
             ':id'       => $requestId,
         ]);
     } else {
-        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, updated_at = NOW() WHERE id = :id');
+        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration = :duration, reason = :reason, updated_at = NOW() WHERE id = :id');
         $stmt->execute([
             ':type'     => $_POST['type'] ?? 'Annual',
             ':start'    => $start,

@@ -14,7 +14,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="styles.css?v=24">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="auth-page">
@@ -57,7 +57,10 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-col">
                         <label>Password</label>
-                        <input type="password" name="password" id="reg-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                        <div class="pw-input-wrap">
+                            <input type="password" name="password" id="reg-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                            <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+                        </div>
                         <div class="password-strength" id="reg-pw-strength"></div>
                     </div>
                 </div>
@@ -84,6 +87,61 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Join Date</label>
+                        <!-- Used to calculate leave tier under Malaysia Employment Act 1955 -->
+                        <input type="date" name="join_date" id="reg-join-date" max="<?= date('Y-m-d') ?>" required>
+                        <span class="field-hint">Your first official day of employment</span>
+                    </div>
+                    <div class="form-col"></div>
+                </div>
+
+                <!-- Employment type card selector -->
+                <div class="form-group-full">
+                    <label class="emp-type-label">Employment Type</label>
+                    <p class="emp-type-sublabel">Select your employment status. This determines your annual leave entitlement.</p>
+                    <div class="emp-type-grid">
+
+                        <input type="radio" name="employment_type" id="etype-permanent" value="Permanent" checked>
+                        <label for="etype-permanent" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-blue">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Permanent</span>
+                                <span class="emp-type-desc">Full-time, indefinite employment</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-blue">8 – 16 days / year</span>
+                        </label>
+
+                        <input type="radio" name="employment_type" id="etype-contract" value="Contract">
+                        <label for="etype-contract" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-amber">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Contract</span>
+                                <span class="emp-type-desc">Fixed-term employment agreement</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-amber">8 – 16 days / year</span>
+                        </label>
+
+                        <input type="radio" name="employment_type" id="etype-parttime" value="Part-Time">
+                        <label for="etype-parttime" class="emp-type-card">
+                            <div class="emp-type-icon-wrap emp-type-purple">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="emp-type-body">
+                                <span class="emp-type-name">Part-Time</span>
+                                <span class="emp-type-desc">Reduced hours, flexible schedule</span>
+                            </div>
+                            <span class="emp-type-badge emp-badge-purple">4 – 8 days / year</span>
+                        </label>
+
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary full-width">Create Account</button>
             </form>
 
@@ -94,6 +152,18 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+        function togglePw(btn) {
+            const input = btn.closest('.pw-input-wrap').querySelector('input');
+            const icon  = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
         // Show live password strength feedback
         document.getElementById('reg-password').addEventListener('input', function () {
             document.getElementById('reg-pw-strength').innerHTML = getStrengthBar(this.value);

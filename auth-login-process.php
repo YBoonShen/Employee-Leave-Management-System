@@ -20,17 +20,17 @@ try {
                ADD COLUMN IF NOT EXISTS job_title VARCHAR(100), 
                ADD COLUMN IF NOT EXISTS location VARCHAR(150)");
 
-    // SEED: Create or Update the specific manager account
+    // SEED: Create the manager account on first run only
     $mCheck = $db->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
     $mCheck->execute([':email' => 'boonshen1159@gmail.com']);
     if (!$mCheck->fetch()) {
-        $mHash = password_hash('123', PASSWORD_DEFAULT);
-        $db->prepare('INSERT INTO users (employee_id, name, email, password_hash, role, department, job_title) 
+        $mHash = password_hash('Nexus@2024', PASSWORD_DEFAULT);
+        $db->prepare('INSERT INTO users (employee_id, name, email, password_hash, role, department, job_title)
                       VALUES ("MGR001", "Boon Shen", "boonshen1159@gmail.com", :h, "manager", "Management", "General Manager")')
            ->execute([':h' => $mHash]);
     } else {
-        // Ensure this user has the manager role and correct name
-        $db->prepare('UPDATE users SET role = "manager", name = "Boon Shen" WHERE email = "boonshen1159@gmail.com"')->execute();
+        // Only enforce manager role — never overwrite the name (allows profile edits to persist)
+        $db->prepare('UPDATE users SET role = "manager" WHERE email = "boonshen1159@gmail.com"')->execute();
     }
 
     $stmt = $db->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
@@ -41,6 +41,9 @@ try {
         header('Location: page-login.php?error=1');
         exit;
     }
+
+    // Regenerate session ID after login to prevent session fixation
+    session_regenerate_id(true);
 
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['employee_id'] = $user['employee_id'];

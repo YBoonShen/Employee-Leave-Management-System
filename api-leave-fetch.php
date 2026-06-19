@@ -20,6 +20,7 @@ try {
     if (empty($cols)) $db->exec("ALTER TABLE users ADD COLUMN allowance INT DEFAULT 21");
     $cols2 = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'proof_files'")->fetchAll();
     if (empty($cols2)) $db->exec("ALTER TABLE leave_requests ADD COLUMN proof_files TEXT NULL");
+>>>>>>>>> Temporary merge branch 2
     
     $currentId = $_SESSION['user_id'];
     $currentRole = $_SESSION['role'] ?? 'employee';
@@ -35,7 +36,7 @@ try {
     }
 
     // Get the target user info
-    $userStmt = $db->prepare('SELECT id, name, employee_id, role, department, phone, job_title, location, email, allowance FROM users WHERE id = :id LIMIT 1');
+    $userStmt = $db->prepare('SELECT id, name, employee_id, role, department, phone, job_title, location, email, allowance, employment_type, join_date FROM users WHERE id = :id LIMIT 1');
     $userStmt->execute([':id' => $targetId]);
     $user = $userStmt->fetch();
 
@@ -73,7 +74,7 @@ try {
             'type' => $r['type'],
             'start' => $r['start_date'],
             'end' => $r['end_date'],
-            'duration' => (int)$r['duration_days'],
+            'duration' => (int)$r['duration'],
             'reason' => $r['reason'],
             'status' => $r['status'],
             'comment' => $r['manager_comment'] ?? '',

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="styles.css?v=24">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="role-employee">
@@ -26,6 +26,7 @@
                     <span class="nav-label">Management</span>
                     <a href="#" class="nav-item" data-target="manager-approvals"><i class="fas fa-tasks"></i> Approvals</a>
                     <a href="#" class="nav-item" data-target="team-overview"><i class="fas fa-users"></i> Employee Management</a>
+                    <a href="#" class="nav-item" data-target="reports"><i class="fas fa-chart-bar"></i> Reports</a>
                 </div>
                 <div class="nav-group"><span class="nav-label">Alerts</span><a href="#" class="nav-item" data-target="notifications"><i class="fas fa-bell"></i> Notifications</a></div>
                 <div class="nav-group">
@@ -163,6 +164,9 @@
                         </div>
                     </div>
 
+                    <!-- Employment overview card — populated by renderEmploymentCard() -->
+                    <div id="emp-overview-section" class="employee-only" style="margin-bottom:24px;"></div>
+
                     <div class="table-card employee-only">
                         <div class="card-header">
                             <h2>Latest Activity</h2>
@@ -252,7 +256,69 @@
                 </section>
                 
                 <section id="team-overview" class="page-section">
-                    <div class="table-card"><div class="card-header"><h2>Users</h2></div><div class="table-container"><table class="data-table"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Dept</th><th>Action</th></tr></thead><tbody id="user-management-table-body"></tbody></table></div></div>
+                    <div class="table-card"><div class="card-header"><h2>Users</h2></div><div class="table-container"><table class="data-table"><thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Dept</th><th>Type</th><th>Service</th><th>Action</th></tr></thead><tbody id="user-management-table-body"></tbody></table></div></div>
+                </section>
+
+                <section id="reports" class="page-section">
+                    <!-- Summary stat cards -->
+                    <div class="stats-grid" id="report-stats-grid" style="margin-bottom:24px;">
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
+                            <div class="stat-info"><h3>Total Requests</h3><p class="stat-value" id="rpt-total">—</p><p class="stat-micro">All time</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-info"><h3>Approved</h3><p class="stat-value" id="rpt-approved">—</p><p class="stat-micro">Leave requests approved</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fas fa-hourglass-half"></i></div>
+                            <div class="stat-info"><h3>Pending</h3><p class="stat-value" id="rpt-pending">—</p><p class="stat-micro">Awaiting review</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                            <div class="stat-info"><h3>Rejected</h3><p class="stat-value" id="rpt-rejected">—</p><p class="stat-micro">Leave requests rejected</p></div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+                        <!-- Leave by type -->
+                        <div class="table-card">
+                            <div class="card-header"><h2>Leave by Type</h2></div>
+                            <div style="padding:20px;" id="rpt-type-bars"></div>
+                        </div>
+                        <!-- Leave by department -->
+                        <div class="table-card">
+                            <div class="card-header"><h2>Leave by Department</h2></div>
+                            <div style="padding:20px;" id="rpt-dept-bars"></div>
+                        </div>
+                    </div>
+
+                    <!-- All leave requests table -->
+                    <div class="table-card">
+                        <div class="card-header">
+                            <h2>All Leave Records</h2>
+                            <div style="display:flex;gap:8px;">
+                                <select id="rpt-filter-status" class="filter-select" onchange="app.loadReport()">
+                                    <option value="">All Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                                <select id="rpt-filter-type" class="filter-select" onchange="app.loadReport()">
+                                    <option value="">All Types</option>
+                                    <option value="Annual">Annual</option>
+                                    <option value="Sick">Sick</option>
+                                    <option value="Unpaid">Unpaid</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Employee</th><th>Dept</th><th>Type</th><th>Period</th><th>Days</th><th>Status</th><th>Applied On</th></tr></thead>
+                                <tbody id="rpt-records-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
 
                 <section id="notifications" class="page-section">
@@ -271,6 +337,10 @@
     <div id="detail-modal" class="modal-overlay"><div class="modal-card"><div class="modal-header"><h3>Details</h3><button onclick="app.closeModal()">&times;</button></div><div class="modal-body" id="modal-content"></div></div></div>
     <div id="toast" class="toast"><div class="toast-content"><div class="message"><span class="toast-title" id="toast-title"></span><span class="toast-desc" id="toast-desc"></span></div></div></div>
     
+<<<<<<<<< Temporary merge branch 1
+    <script src="script.js?v=16"></script>
+=========
     <script src="script.js?v=17"></script>
+>>>>>>>>> Temporary merge branch 2
 </body>
 </html>

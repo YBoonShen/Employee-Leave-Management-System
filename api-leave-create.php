@@ -32,6 +32,18 @@ try {
     $duration = (int)($_POST['duration'] ?? 1);
     $type     = $_POST['type']     ?? 'Annual';
 
+    if ($duration <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Duration must be at least 1 day.']);
+        exit;
+    }
+
+    if ($start > $end) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Start date cannot be after end date.']);
+        exit;
+    }
+
     // Handle file uploads
     $uploadDir = __DIR__ . '/uploads/';
     if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
@@ -66,7 +78,7 @@ try {
     $userStmt->execute([':uid' => $userId]);
     $allowance = (int)$userStmt->fetchColumn();
 
-    $takenStmt = $db->prepare('SELECT SUM(duration_days) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
+    $takenStmt = $db->prepare('SELECT SUM(duration) FROM leave_requests WHERE user_id = :uid AND status = "Approved"');
     $takenStmt->execute([':uid' => $userId]);
     $taken = (int)$takenStmt->fetchColumn();
 
@@ -76,7 +88,7 @@ try {
         exit;
     }
 
-    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration_days, reason, proof_files)
+    $stmt = $db->prepare('INSERT INTO leave_requests (user_id, type, start_date, end_date, duration, reason, proof_files)
                           VALUES (:uid, :type, :start, :end, :duration, :reason, :proof)');
     $stmt->execute([
         ':uid'    => $userId,
