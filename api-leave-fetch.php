@@ -20,7 +20,10 @@ try {
     if (empty($cols)) $db->exec("ALTER TABLE users ADD COLUMN allowance INT DEFAULT 21");
     $cols2 = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'proof_files'")->fetchAll();
     if (empty($cols2)) $db->exec("ALTER TABLE leave_requests ADD COLUMN proof_files TEXT NULL");
->>>>>>>>> Temporary merge branch 2
+    $cols3 = $db->query("SHOW COLUMNS FROM users LIKE 'employment_type'")->fetchAll();
+    if (empty($cols3)) $db->exec("ALTER TABLE users ADD COLUMN employment_type ENUM('Permanent','Contract','Part-Time') DEFAULT 'Permanent'");
+    $cols4 = $db->query("SHOW COLUMNS FROM users LIKE 'join_date'")->fetchAll();
+    if (empty($cols4)) $db->exec("ALTER TABLE users ADD COLUMN join_date DATE NULL");
     
     $currentId = $_SESSION['user_id'];
     $currentRole = $_SESSION['role'] ?? 'employee';
