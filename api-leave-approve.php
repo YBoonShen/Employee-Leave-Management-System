@@ -1,4 +1,5 @@
 <?php
+// Manager-only endpoint — approves or rejects a leave request and notifies the employee.
 session_start();
 require __DIR__ . '/config.php';
 
@@ -38,14 +39,15 @@ try {
     }
 
     // Prevent self-approval
-    if ($owner['user_id'] == $_SESSION['user_id']) {
+    if ((int)$owner['user_id'] === (int)$_SESSION['user_id']) {
         http_response_code(403);
         echo json_encode(['error' => 'You cannot approve or reject your own leave requests.']);
         exit;
     }
 
-    // Ensure manager_comment column exists
-    $db->exec("ALTER TABLE leave_requests ADD COLUMN IF NOT EXISTS manager_comment TEXT");
+    // Add manager_comment column if missing (MySQL 5.7 compatible)
+    $cols = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'manager_comment'")->fetchAll();
+    if (empty($cols)) $db->exec("ALTER TABLE leave_requests ADD COLUMN manager_comment TEXT");
 
     $stmt = $db->prepare('UPDATE leave_requests SET status = :status, manager_comment = :comment, updated_at = NOW() WHERE id = :id');
     $stmt->execute([

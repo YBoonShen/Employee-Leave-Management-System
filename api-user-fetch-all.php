@@ -11,7 +11,7 @@ if (empty($_SESSION['user_id']) || !in_array($_SESSION['role'], ['manager', 'adm
 
 try {
     $db = get_db_connection();
-    $stmt = $db->query("SELECT id, name, employee_id, role, email, department, job_title, created_at FROM users ORDER BY name ASC");
+    $stmt = $db->query("SELECT id, name, employee_id, role, email, department, job_title, phone, location, employment_type, join_date, allowance, created_at FROM users ORDER BY name ASC");
     $users = $stmt->fetchAll();
 
     echo json_encode(['users' => $users]);

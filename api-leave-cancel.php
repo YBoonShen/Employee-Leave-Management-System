@@ -1,4 +1,5 @@
 <?php
+// Deletes a pending leave request. Only the owner can cancel, and only while still Pending.
 session_start();
 require __DIR__ . '/config.php';
 header('Content-Type: application/json');

@@ -1,4 +1,5 @@
 <?php
+// Updates a pending leave request. Replaces files if new ones are uploaded.
 session_start();
 require __DIR__ . '/config.php';
 header('Content-Type: application/json');
@@ -6,6 +7,12 @@ header('Content-Type: application/json');
 if (empty($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
 
@@ -18,6 +25,18 @@ try {
     $duration = (int)($_POST['duration'] ?? 0);
     $start    = $_POST['start'] ?? '';
     $end      = $_POST['end']   ?? '';
+
+    if ($duration <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Duration must be at least 1 day.']);
+        exit;
+    }
+
+    if ($start > $end) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Start date cannot be after end date.']);
+        exit;
+    }
 
     // 1. Check if it belongs to user and is still Pending
     $check = $db->prepare('SELECT status, duration_days FROM leave_requests WHERE id = :id AND user_id = :uid');

@@ -13,9 +13,14 @@ $payload = json_decode(file_get_contents('php://input'), true);
 $current = $payload['current'] ?? '';
 $new = $payload['new'] ?? '';
 
-if (strlen($new) < 3) {
+if (
+    strlen($new) < 6 ||
+    !preg_match('/[A-Za-z]/', $new) ||
+    !preg_match('/[0-9]/', $new) ||
+    !preg_match('/[^A-Za-z0-9]/', $new)
+) {
     http_response_code(400);
-    echo json_encode(['error' => 'New password too short']);
+    echo json_encode(['error' => 'Password must be at least 6 characters and include a letter, number, and symbol']);
     exit;
 }
 

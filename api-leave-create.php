@@ -1,4 +1,5 @@
 <?php
+// Handles submitting a new leave request (multipart/form-data with optional file uploads).
 session_start();
 require __DIR__ . '/config.php';
 
@@ -30,6 +31,18 @@ try {
     $end      = $_POST['end']      ?? '';
     $duration = (int)($_POST['duration'] ?? 1);
     $type     = $_POST['type']     ?? 'Annual';
+
+    if ($duration <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Duration must be at least 1 day.']);
+        exit;
+    }
+
+    if ($start > $end) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Start date cannot be after end date.']);
+        exit;
+    }
 
     // Handle file uploads
     $uploadDir = __DIR__ . '/uploads/';
