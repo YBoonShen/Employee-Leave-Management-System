@@ -29,6 +29,7 @@ const API = {
   DELETE_NOTIFICATION: 'api-notify-delete.php',
   UPDATE_PROFILE:      'api-user-profile-update.php',
   UPDATE_ALLOWANCE:    'api-user-allowance-update.php',
+  UPDATE_JOINDATE:     'api-user-joindate-update.php',
   CHANGE_PASSWORD:     'api-user-password-change.php',
 };
 
@@ -625,7 +626,12 @@ const app = {
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
               <div style="background:#f8fafc; border-radius:10px; padding:12px 14px;">
                 <span style="font-size:0.72rem; font-weight:700; color:var(--text-sub); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px;">Join Date</span>
-                <strong style="font-size:0.9rem;">${joinFmt}</strong>
+                <div id="joindate-edit-area" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                  <strong style="font-size:0.9rem;">${joinFmt}</strong>
+                  <button class="btn btn-sm btn-outline" style="font-size:0.68rem; padding:2px 6px;" onclick="app.editJoinDate(${u.id}, '${u.join_date || ''}')" title="Edit join date">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
               </div>
               <div style="background:#f8fafc; border-radius:10px; padding:12px 14px;">
                 <span style="font-size:0.72rem; font-weight:700; color:var(--text-sub); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px;">Years of Service</span>
@@ -690,6 +696,32 @@ const app = {
       this.viewEmployeeProfile(userId);
     } else {
       this.showToast('Error', res?.error || 'Failed to update allowance.', 'danger');
+    }
+  },
+
+  // Show inline date input for manager to set an employee's join date
+  editJoinDate(userId, current) {
+    const area = document.getElementById('joindate-edit-area');
+    if (!area) return;
+    area.innerHTML = `
+      <input type="date" id="new-joindate-input" value="${current}" max="${new Date().toISOString().split('T')[0]}" style="font-size:0.82rem; width:100%;">
+      <button class="btn btn-sm btn-primary" onclick="app.saveJoinDate(${userId})">Save</button>
+      <button class="btn btn-sm btn-outline" onclick="app.viewEmployeeProfile(${userId})">Cancel</button>`;
+  },
+
+  async saveJoinDate(userId) {
+    const input = document.getElementById('new-joindate-input');
+    const joinDate = input?.value ?? '';
+    if (!joinDate) {
+      return this.showToast('Invalid', 'Please pick a join date.', 'danger');
+    }
+    const res = await this.fetchAPI(API.UPDATE_JOINDATE, 'POST', { user_id: userId, join_date: joinDate });
+    if (res && res.ok) {
+      this.showToast('Updated', `Join date set. Allowance recalculated to ${res.allowance} days.`);
+      await this.loadFromServer();
+      this.viewEmployeeProfile(userId);
+    } else {
+      this.showToast('Error', res?.error || 'Failed to update join date.', 'danger');
     }
   },
 
