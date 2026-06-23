@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git merge *)",
+      "Bash(git config *)",
+      "Bash(git fetch *)",
+      "Bash(Select-String -Pattern \"docx|pdf\")",
+      "Bash(git ls-tree *)",
+      "PowerShell(Remove-Item *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}
