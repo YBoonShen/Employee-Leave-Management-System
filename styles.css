@@ -120,6 +120,12 @@ input:focus {
   margin-top: 24px;
 }
 
+.edit-form-grid .form-group input,
+.edit-form-grid .form-group select {
+  width: 100%;
+  display: block;
+}
+
 .profile-edit-card .form-group label {
   font-size: 0.8rem;
   font-weight: 600;
@@ -967,6 +973,8 @@ select {
 
 .modal-body {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
@@ -1010,12 +1018,234 @@ select {
   text-align: center;
 }
 
+/* ── Leave Detail Modal redesign ── */
+.modal-emp-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-emp-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-emp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-emp-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.modal-emp-meta {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+}
+
+.modal-leave-type-val {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.modal-leave-type-val i {
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.modal-duration-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  border-radius: 20px;
+  padding: 2px 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.modal-attach-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.modal-attach-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-attach-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-attach-thumb i {
+  font-size: 1.2rem;
+  color: #e11d48;
+}
+
+.modal-attach-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-main);
+  word-break: break-all;
+}
+
+.modal-attach-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.modal-attach-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-attach-link:hover {
+  text-decoration: underline;
+}
+
+.modal-footer-bar {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border-radius: 0 0 20px 20px;
+  flex-shrink: 0;
+}
+
+.modal-footer-ts {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-footer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-reject-outline {
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  background: #fff;
+}
+
+.btn-reject-outline:hover {
+  background: #fef2f2;
+}
+
+.modal-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-info-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal-info-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-sub);
+}
+
+.modal-info-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.modal-reason-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.modal-reason-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+.modal-reason-text {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-main);
+  word-break: break-word;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
 .approver-comment-box {
   margin-top: 20px;
   padding: 16px;
   background: #fff7ed;
   border: 1px solid #ffedd5;
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .approver-comment-box.rejected {
@@ -1038,9 +1268,12 @@ select {
 
 .comment-text {
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--text-main);
   font-style: italic;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* Notifications */

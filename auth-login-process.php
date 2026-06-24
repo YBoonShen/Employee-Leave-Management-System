@@ -45,10 +45,17 @@ try {
     // Regenerate session ID after login to prevent session fixation
     session_regenerate_id(true);
 
-    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_id']     = $user['id'];
     $_SESSION['employee_id'] = $user['employee_id'];
-    $_SESSION['name'] = $user['name'];
-    $_SESSION['role'] = $user['role'];
+    $_SESSION['name']        = $user['name'];
+    $_SESSION['role']        = $user['role'];
+    $_SESSION['email']       = $user['email'];
+    $_SESSION['department']  = $user['department']  ?? '';
+    $_SESSION['job_title']   = $user['job_title']   ?? '';
+    $_SESSION['phone']       = $user['phone']        ?? '';
+    $_SESSION['location']    = $user['location']     ?? '';
+    $_SESSION['employment_type'] = $user['employment_type'] ?? 'Permanent';
+    $_SESSION['join_date']   = $user['join_date']    ?? '';
 
     header('Location: page-main.php');
 } catch (Throwable $e) {

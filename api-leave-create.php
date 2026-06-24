@@ -25,6 +25,13 @@ if (empty($_POST)) {
 
 try {
     $db = get_db_connection();
+
+    // Ensure duration_days column exists (MySQL 5.7 compatible)
+    $hasDuration = $db->query("SHOW COLUMNS FROM leave_requests LIKE 'duration_days'")->fetchAll();
+    if (empty($hasDuration)) {
+        $db->exec("ALTER TABLE leave_requests ADD COLUMN duration_days INT NOT NULL DEFAULT 1");
+    }
+
     $userId = $_SESSION['user_id'];
 
     $start    = $_POST['start']    ?? '';
@@ -50,6 +57,12 @@ try {
 
     $savedFiles   = [];
     $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+
+    if (!empty($_FILES['proof_files']['name'][0]) && count($_FILES['proof_files']['name']) > 3) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Maximum 3 supporting documents allowed.']);
+        exit;
+    }
 
     if (!empty($_FILES['proof_files']['name'][0])) {
         foreach ($_FILES['proof_files']['tmp_name'] as $i => $tmpFile) {

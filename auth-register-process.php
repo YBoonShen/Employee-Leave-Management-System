@@ -18,6 +18,39 @@ $phone           = trim($_POST['phone'] ?? '');
 $job_title       = trim($_POST['job_title'] ?? '');
 $location        = trim($_POST['location'] ?? '');
 
+// Whitelists for select fields
+$allowed_departments = [
+    'Administration', 'Business Development', 'Customer Service', 'Engineering',
+    'Finance & Accounting', 'Human Resources', 'Information Technology',
+    'Legal & Compliance', 'Logistics & Supply Chain', 'Management', 'Marketing',
+    'Operations', 'Procurement', 'Quality Assurance', 'Research & Development', 'Sales',
+];
+$allowed_job_titles = [
+    'Chief Executive Officer', 'Chief Operating Officer', 'Chief Financial Officer',
+    'Chief Technology Officer', 'Director', 'Senior Manager', 'Manager', 'Assistant Manager',
+    'Senior Engineer', 'Engineer', 'Senior Developer', 'Developer',
+    'Senior Analyst', 'Analyst', 'Consultant', 'Specialist', 'Supervisor',
+    'Senior Executive', 'Executive', 'Coordinator', 'Administrator', 'Officer', 'Clerk', 'Intern',
+];
+$allowed_locations = [
+    'Johor', 'Kedah', 'Kelantan', 'Kuala Lumpur', 'Labuan', 'Melaka',
+    'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis',
+    'Putrajaya', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu',
+];
+
+if (!in_array($department, $allowed_departments, true)) {
+    header('Location: page-register.php?error=invalid_dept');
+    exit;
+}
+if (!in_array($job_title, $allowed_job_titles, true)) {
+    header('Location: page-register.php?error=invalid_jobtitle');
+    exit;
+}
+if (!in_array($location, $allowed_locations, true)) {
+    header('Location: page-register.php?error=invalid_location');
+    exit;
+}
+
 // Validate employment type
 $allowed_types   = ['Permanent', 'Contract', 'Part-Time'];
 $employment_type = in_array($_POST['employment_type'] ?? '', $allowed_types)
@@ -51,7 +84,37 @@ function calculateAllowanceByService(string $employment_type, ?string $join_date
 
 $allowance = calculateAllowanceByService($employment_type, $join_date);
 
-if ($name === '' || $employeeId === '' || $email === '' || $password === '') {
+// Full name must contain at least one letter
+if ($name === '' || !preg_match('/[A-Za-z]/', $name)) {
+    header('Location: page-register.php?error=invalid_name');
+    exit;
+}
+
+// Employee ID: exactly EMP + 3 digits, 001-999
+if (!preg_match('/^EMP[0-9]{3}$/', $employeeId) || (int)substr($employeeId, 3) < 1) {
+    header('Location: page-register.php?error=invalid_empid');
+    exit;
+}
+
+// Email must be a valid address
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    header('Location: page-register.php?error=invalid_email');
+    exit;
+}
+
+// Password must meet Strong criteria
+if (
+    strlen($password) < 8 ||
+    !preg_match('/[A-Z]/', $password) ||
+    !preg_match('/[a-z]/', $password) ||
+    !preg_match('/[0-9]/', $password) ||
+    !preg_match('/[^A-Za-z0-9]/', $password)
+) {
+    header('Location: page-register.php?error=weak_password');
+    exit;
+}
+
+if ($email === '' || $password === '') {
     header('Location: page-register.php?error=1');
     exit;
 }
@@ -73,6 +136,14 @@ try {
     $checkStmt->execute([':email' => $email, ':emp' => $employeeId]);
     if ($checkStmt->fetch()) {
         header('Location: page-register.php?error=exists');
+        exit;
+    }
+
+    // Prevent registering with the same name as an existing manager
+    $mgrCheck = $db->prepare("SELECT id FROM users WHERE role IN ('manager','admin') AND LOWER(name) = LOWER(:name) LIMIT 1");
+    $mgrCheck->execute([':name' => $name]);
+    if ($mgrCheck->fetch()) {
+        header('Location: page-register.php?error=name_reserved');
         exit;
     }
 

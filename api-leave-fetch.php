@@ -52,14 +52,14 @@ try {
     // Fetch requests for the target user (or all if requested without user_id by a manager)
     if (!isset($_GET['user_id']) && ($currentRole === 'manager' || $currentRole === 'admin')) {
         // Manager Dashboard view: all requests
-        $stmt = $db->prepare('SELECT lr.*, u.name AS empName, u.employee_id AS empId
+        $stmt = $db->prepare('SELECT lr.*, u.name AS empName, u.employee_id AS empId, u.job_title AS empTitle, u.department AS empDept
                               FROM leave_requests lr
                               JOIN users u ON lr.user_id = u.id
                               ORDER BY lr.created_at DESC');
         $stmt->execute();
     } else {
         // Specific user profile view or personal view
-        $stmt = $db->prepare('SELECT lr.*, u.name AS empName, u.employee_id AS empId
+        $stmt = $db->prepare('SELECT lr.*, u.name AS empName, u.employee_id AS empId, u.job_title AS empTitle, u.department AS empDept
                               FROM leave_requests lr
                               JOIN users u ON lr.user_id = u.id
                               WHERE lr.user_id = :uid
@@ -72,16 +72,19 @@ try {
     $requests = array_map(function ($r) {
         return [
             'id' => (int)$r['id'],
-            'empName' => $r['empName'],
-            'empId' => $r['empId'],
-            'type' => $r['type'],
-            'start' => $r['start_date'],
-            'end' => $r['end_date'],
+            'empName'  => $r['empName'],
+            'empId'    => $r['empId'],
+            'empTitle' => $r['empTitle'] ?? '',
+            'empDept'  => $r['empDept']  ?? '',
+            'type'     => $r['type'],
+            'start'    => $r['start_date'],
+            'end'      => $r['end_date'],
             'duration' => (int)$r['duration_days'],
-            'reason' => $r['reason'],
-            'status' => $r['status'],
-            'comment' => $r['manager_comment'] ?? '',
-            'date' => substr($r['created_at'], 0, 10),
+            'reason'   => $r['reason'],
+            'status'   => $r['status'],
+            'comment'  => $r['manager_comment'] ?? '',
+            'date'     => substr($r['created_at'], 0, 10),
+            'createdAt'=> $r['created_at'] ?? '',
             'proofFiles' => !empty($r['proof_files']) ? json_decode($r['proof_files'], true) : [],
         ];
     }, $rows);

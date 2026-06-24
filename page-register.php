@@ -29,8 +29,22 @@ if (isset($_SESSION['user_id'])) {
             <h1>Create account</h1>
             <p class="text-muted">Fill in your details to get started.</p>
 
-            <?php if (!empty($_GET['error'])): ?>
-                <div class="auth-error">Registration failed. Email or employee ID may already be in use.</div>
+            <?php if (!empty($_GET['error'])):
+                $errMsgs = [
+                    'invalid_name'     => 'Full Name must contain letters, not numbers only.',
+                    'invalid_empid'    => 'Employee ID must be EMP followed by exactly 3 digits (EMP001 to EMP999).',
+                    'invalid_email'    => 'Please enter a valid email address.',
+                    'weak_password'    => 'Password must be at least 8 characters and include uppercase, lowercase, a number and a symbol.',
+                    'invalid_dept'     => 'Please select a valid department from the list.',
+                    'invalid_jobtitle' => 'Please select a valid job title from the list.',
+                    'invalid_location' => 'Please select a valid Malaysian state from the list.',
+                    'name_reserved'    => 'That name is already in use by a manager account and cannot be registered.',
+                    'exists'           => 'Registration failed. Email or Employee ID is already in use.',
+                ];
+                $code = $_GET['error'];
+                $msg  = $errMsgs[$code] ?? 'Registration failed. Please check your details and try again.';
+            ?>
+                <div class="auth-error"><?= htmlspecialchars($msg) ?></div>
             <?php endif; ?>
 
             <div id="reg-error" class="auth-error" style="display:none;"></div>
@@ -45,8 +59,8 @@ if (isset($_SESSION['user_id'])) {
                         <label>Employee ID</label>
                         <!-- Must start with EMP followed by digits, e.g. EMP001 -->
                         <input type="text" name="employee_id" id="reg-emp-id"
-                               placeholder="EMP001" pattern="EMP\d+" title="Must start with EMP followed by numbers (e.g. EMP001)" required>
-                        <span class="field-hint">Format: EMP + numbers (e.g. EMP001)</span>
+                               placeholder="EMP001" pattern="EMP[0-9]{3}" title="Must be EMP followed by exactly 3 digits, 001 to 999 (e.g. EMP001)" required>
+                        <span class="field-hint">Format: EMP + 3 digits (EMP001 to EMP999)</span>
                     </div>
                 </div>
 
@@ -58,7 +72,7 @@ if (isset($_SESSION['user_id'])) {
                     <div class="form-col">
                         <label>Password</label>
                         <div class="pw-input-wrap">
-                            <input type="password" name="password" id="reg-password" placeholder="Min 6 chars, letters + numbers + symbol" required>
+                            <input type="password" name="password" id="reg-password" placeholder="Min 8 chars, upper + lower + number + symbol" required>
                             <button type="button" class="pw-toggle-btn" onclick="togglePw(this)" tabindex="-1"><i class="fas fa-eye"></i></button>
                         </div>
                         <div class="password-strength" id="reg-pw-strength"></div>
@@ -68,11 +82,61 @@ if (isset($_SESSION['user_id'])) {
                 <div class="form-row">
                     <div class="form-col">
                         <label>Department</label>
-                        <input type="text" name="department" placeholder="e.g. IT, HR, Marketing" required>
+                        <select name="department" required>
+                            <option value="" disabled selected>-- Select Department --</option>
+                            <option>Administration</option>
+                            <option>Business Development</option>
+                            <option>Customer Service</option>
+                            <option>Engineering</option>
+                            <option>Finance &amp; Accounting</option>
+                            <option>Human Resources</option>
+                            <option>Information Technology</option>
+                            <option>Legal &amp; Compliance</option>
+                            <option>Logistics &amp; Supply Chain</option>
+                            <option>Management</option>
+                            <option>Marketing</option>
+                            <option>Operations</option>
+                            <option>Procurement</option>
+                            <option>Quality Assurance</option>
+                            <option>Research &amp; Development</option>
+                            <option>Sales</option>
+                        </select>
                     </div>
                     <div class="form-col">
                         <label>Job Title</label>
-                        <input type="text" name="job_title" placeholder="e.g. Software Engineer" required>
+                        <select name="job_title" required>
+                            <option value="" disabled selected>-- Select Job Title --</option>
+                            <optgroup label="Management">
+                                <option>Chief Executive Officer</option>
+                                <option>Chief Operating Officer</option>
+                                <option>Chief Financial Officer</option>
+                                <option>Chief Technology Officer</option>
+                                <option>Director</option>
+                                <option>Senior Manager</option>
+                                <option>Manager</option>
+                                <option>Assistant Manager</option>
+                            </optgroup>
+                            <optgroup label="Professional">
+                                <option>Senior Engineer</option>
+                                <option>Engineer</option>
+                                <option>Senior Developer</option>
+                                <option>Developer</option>
+                                <option>Senior Analyst</option>
+                                <option>Analyst</option>
+                                <option>Consultant</option>
+                                <option>Specialist</option>
+                                <option>Supervisor</option>
+                            </optgroup>
+                            <optgroup label="Support">
+                                <option>Senior Executive</option>
+                                <option>Executive</option>
+                                <option>Coordinator</option>
+                                <option>Administrator</option>
+                                <option>Officer</option>
+                                <option>Clerk</option>
+                                <option>Intern</option>
+                            </optgroup>
+                        </select>
                     </div>
                 </div>
 
@@ -83,7 +147,25 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-col">
                         <label>Location</label>
-                        <input type="text" name="location" placeholder="e.g. Kuala Lumpur, Malaysia" required>
+                        <select name="location" required>
+                            <option value="" disabled selected>-- Select State --</option>
+                            <option>Johor</option>
+                            <option>Kedah</option>
+                            <option>Kelantan</option>
+                            <option>Kuala Lumpur</option>
+                            <option>Labuan</option>
+                            <option>Melaka</option>
+                            <option>Negeri Sembilan</option>
+                            <option>Pahang</option>
+                            <option>Penang</option>
+                            <option>Perak</option>
+                            <option>Perlis</option>
+                            <option>Putrajaya</option>
+                            <option>Sabah</option>
+                            <option>Sarawak</option>
+                            <option>Selangor</option>
+                            <option>Terengganu</option>
+                        </select>
                     </div>
                 </div>
 
@@ -164,40 +246,58 @@ if (isset($_SESSION['user_id'])) {
             }
         }
 
-        // Show live password strength feedback
         document.getElementById('reg-password').addEventListener('input', function () {
             document.getElementById('reg-pw-strength').innerHTML = getStrengthBar(this.value);
         });
 
         function validateRegister(e) {
+            const name  = document.querySelector('input[name="name"]').value.trim();
             const empId = document.getElementById('reg-emp-id').value.trim();
+            const email = document.querySelector('input[name="email"]').value.trim();
             const pw    = document.getElementById('reg-password').value;
             const errEl = document.getElementById('reg-error');
 
-            // Employee ID must be EMP + digits
-            if (!/^EMP\d+$/.test(empId)) {
-                errEl.textContent = 'Employee ID must start with "EMP" followed by numbers (e.g. EMP001).';
+            function fail(msg) {
+                errEl.textContent = msg;
                 errEl.style.display = 'block';
                 e.preventDefault();
                 return false;
             }
 
+            // Full name must contain at least one letter (not purely numeric)
+            if (!/[A-Za-z]/.test(name)) {
+                return fail('Full Name must contain letters, not numbers only.');
+            }
+
+            // Employee ID: exactly EMP + 3 digits, 001-999
+            if (!/^EMP[0-9]{3}$/.test(empId)) {
+                return fail('Employee ID must be EMP followed by exactly 3 digits (e.g. EMP001).');
+            }
+            const empNum = parseInt(empId.slice(3), 10);
+            if (empNum < 1 || empNum > 999) {
+                return fail('Employee ID number must be between 001 and 999.');
+            }
+
+            // Email must contain @ and a domain
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return fail('Please enter a valid email address (e.g. ali@company.com).');
+            }
+
+            // Password must be Strong (all 4 criteria)
             const pwErr = checkPassword(pw);
             if (pwErr) {
-                errEl.textContent = pwErr;
-                errEl.style.display = 'block';
-                e.preventDefault();
-                return false;
+                return fail(pwErr);
             }
 
             errEl.style.display = 'none';
             return true;
         }
 
-        // Returns an error message if the password is too weak, or null if it passes
+        // All 4 criteria required; returns error string or null
         function checkPassword(pw) {
-            if (pw.length < 6)            return 'Password must be at least 6 characters.';
-            if (!/[A-Za-z]/.test(pw))     return 'Password must include at least one letter.';
+            if (pw.length < 8)            return 'Password must be at least 8 characters.';
+            if (!/[A-Z]/.test(pw))        return 'Password must include at least one uppercase letter.';
+            if (!/[a-z]/.test(pw))        return 'Password must include at least one lowercase letter.';
             if (!/[0-9]/.test(pw))        return 'Password must include at least one number.';
             if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include at least one symbol (e.g. @, #, !).';
             return null;
@@ -206,10 +306,10 @@ if (isset($_SESSION['user_id'])) {
         function getStrengthBar(pw) {
             if (!pw) return '';
             let score = 0;
-            if (pw.length >= 6)            score++;
-            if (/[A-Za-z]/.test(pw))       score++;
+            if (pw.length >= 8)            score++;
+            if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
             if (/[0-9]/.test(pw))          score++;
-            if (/[^A-Za-z0-9]/.test(pw))   score++;
+            if (/[^A-Za-z0-9]/.test(pw))  score++;
 
             const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
             const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#22c55e'];

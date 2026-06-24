@@ -73,25 +73,30 @@ try {
         exit;
     }
 
-    // Handle replacement file uploads
-    $uploadDir  = __DIR__ . '/uploads/';
+    // File handling: keep selected existing files, delete removed ones, upload new ones
+    $uploadDir    = __DIR__ . '/uploads/';
     if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
-    $proofFiles = null;
     $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
 
-    if (!empty($_FILES['proof_files']['name'][0])) {
-        // Delete old files for this request
-        $old = $db->prepare('SELECT proof_files FROM leave_requests WHERE id = :id');
-        $old->execute([':id' => $requestId]);
-        $oldProof = $old->fetchColumn();
-        if ($oldProof) {
-            foreach (json_decode($oldProof, true) as $f) {
+    // Files the user chose to keep (sent as kept_files[])
+    $keptFiles = array_map('basename', (array)($_POST['kept_files'] ?? []));
+
+    // Delete old files that are NOT in the kept list
+    $old = $db->prepare('SELECT proof_files FROM leave_requests WHERE id = :id');
+    $old->execute([':id' => $requestId]);
+    $oldProof = $old->fetchColumn();
+    if ($oldProof) {
+        foreach (json_decode($oldProof, true) ?? [] as $f) {
+            if (!in_array(basename($f), $keptFiles, true)) {
                 $path = $uploadDir . basename($f);
                 if (file_exists($path)) unlink($path);
             }
         }
-        $savedFiles = [];
+    }
+
+    // Upload new files
+    $newFiles = [];
+    if (!empty($_FILES['proof_files']['name'][0])) {
         foreach ($_FILES['proof_files']['tmp_name'] as $i => $tmpFile) {
             if ($_FILES['proof_files']['error'][$i] !== UPLOAD_ERR_OK) continue;
             $mime = mime_content_type($tmpFile);
@@ -99,31 +104,23 @@ try {
             $ext      = strtolower(pathinfo($_FILES['proof_files']['name'][$i], PATHINFO_EXTENSION));
             $filename = uniqid('proof_', true) . '.' . $ext;
             move_uploaded_file($tmpFile, $uploadDir . $filename);
-            $savedFiles[] = $filename;
+            $newFiles[] = $filename;
         }
-        $proofFiles = !empty($savedFiles) ? json_encode($savedFiles) : null;
-
-        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, proof_files = :proof, updated_at = NOW() WHERE id = :id');
-        $stmt->execute([
-            ':type'     => $_POST['type'] ?? 'Annual',
-            ':start'    => $start,
-            ':end'      => $end,
-            ':duration' => $duration,
-            ':reason'   => $_POST['reason'] ?? null,
-            ':proof'    => $proofFiles,
-            ':id'       => $requestId,
-        ]);
-    } else {
-        $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, updated_at = NOW() WHERE id = :id');
-        $stmt->execute([
-            ':type'     => $_POST['type'] ?? 'Annual',
-            ':start'    => $start,
-            ':end'      => $end,
-            ':duration' => $duration,
-            ':reason'   => $_POST['reason'] ?? null,
-            ':id'       => $requestId,
-        ]);
     }
+
+    $allFiles   = array_merge($keptFiles, $newFiles);
+    $proofFiles = !empty($allFiles) ? json_encode($allFiles) : null;
+
+    $stmt = $db->prepare('UPDATE leave_requests SET type = :type, start_date = :start, end_date = :end, duration_days = :duration, reason = :reason, proof_files = :proof, updated_at = NOW() WHERE id = :id');
+    $stmt->execute([
+        ':type'     => $_POST['type'] ?? 'Annual',
+        ':start'    => $start,
+        ':end'      => $end,
+        ':duration' => $duration,
+        ':reason'   => $_POST['reason'] ?? null,
+        ':proof'    => $proofFiles,
+        ':id'       => $requestId,
+    ]);
 
     echo json_encode(['ok' => true]);
 } catch (Throwable $e) {

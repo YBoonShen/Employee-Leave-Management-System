@@ -194,7 +194,7 @@
                 <section id="apply-leave" class="page-section">
                     <div class="glass-form-container">
                         <div id="apply-leave-form-container">
-                            <div class="form-header"><h2>Submit Request</h2></div>
+                            <div class="form-header"><h2 id="leave-form-title">Submit Request</h2></div>
                             <form id="leave-request-form" onsubmit="app.handleApplicationSubmit(event)">
                                 <div class="form-grid">
                                     <div class="form-group full-width"><label>Leave Type</label>
@@ -212,7 +212,7 @@
                                         <div class="upload-zone" id="upload-zone">
                                             <i class="fas fa-cloud-upload-alt upload-icon"></i>
                                             <p class="upload-title">Drop files here or <span class="upload-link">click to browse</span></p>
-                                            <p class="upload-hint">PDF, JPG, PNG &middot; Max 5 MB per file &middot; Medical certificates, proof documents</p>
+                                            <p class="upload-hint">PDF, JPG, PNG &middot; Max 5 MB per file &middot; Max 3 files per request</p>
                                             <input type="file" id="proof-file" accept=".pdf,.jpg,.jpeg,.png,.gif" style="display:none" multiple>
                                         </div>
                                         <div id="upload-preview" class="upload-preview-list"></div>
@@ -334,9 +334,9 @@
         </main>
     </div>
 
-    <div id="detail-modal" class="modal-overlay"><div class="modal-card"><div class="modal-header"><h3>Details</h3><button onclick="app.closeModal()">&times;</button></div><div class="modal-body" id="modal-content"></div></div></div>
+    <div id="detail-modal" class="modal-overlay"><div class="modal-card"><div class="modal-header"><div><h3 id="modal-title">Details</h3><p id="modal-subtitle" style="font-size:0.78rem;color:var(--text-sub);margin-top:2px;"></p></div><button onclick="app.closeModal()">&times;</button></div><div class="modal-body" id="modal-content"></div><div id="modal-footer-bar" class="modal-footer-bar" style="display:none;"></div></div></div>
     <div id="toast" class="toast"><div class="toast-content"><div class="message"><span class="toast-title" id="toast-title"></span><span class="toast-desc" id="toast-desc"></span></div></div></div>
     
-    <script src="script.js?v=21"></script>
+    <script src="script.js?v=35"></script>
 </body>
 </html>

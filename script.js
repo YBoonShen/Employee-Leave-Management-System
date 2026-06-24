@@ -43,10 +43,11 @@ const app = {
   /* ─── Shared state ─── */
   state: {
     role: 'employee',
-    currentUser: { name: '', id: '', allowance: 21, employee_id: '' },
+    currentUser: { name: '', id: '', allowance: 21, employee_id: '', role: 'employee' },
     requests:    [],
     editingRequestId: null,
     uploadedFiles:    [],
+    existingFiles:    [],
   },
 
   /* ─── Bootstrap ─── */
@@ -67,10 +68,21 @@ const app = {
     });
 
     if (window.NEXUS_USER) {
-      this.state.currentUser.name        = window.NEXUS_USER.name;
-      this.state.currentUser.employee_id = window.NEXUS_USER.id;
-      this.state.role                    = window.NEXUS_USER.role;
-      document.body.className            = `role-${this.state.role}`;
+      const nu = window.NEXUS_USER;
+      Object.assign(this.state.currentUser, {
+        name:            nu.name,
+        employee_id:     nu.id,
+        role:            nu.role,
+        email:           nu.email,
+        department:      nu.department,
+        job_title:       nu.job_title,
+        phone:           nu.phone,
+        location:        nu.location,
+        employment_type: nu.employment_type,
+        join_date:       nu.join_date,
+      });
+      this.state.role     = nu.role;
+      document.body.className = `role-${nu.role}`;
     }
     await this.loadFromServer();
     this.bindEvents();
@@ -550,7 +562,10 @@ const app = {
         <i class="fas fa-circle-notch fa-spin"></i>
         <p>Fetching employee records...</p>
       </div>`;
-    document.querySelector('.modal-header h3').innerText = 'Employee Profile';
+    document.getElementById('modal-title').textContent = 'Employee Profile';
+    document.getElementById('modal-subtitle').textContent = '';
+    const fb2 = document.getElementById('modal-footer-bar');
+    if (fb2) fb2.style.display = 'none';
     document.getElementById('detail-modal').classList.add('open');
 
     const data = await this.fetchAPI(`${API.GET_REQUESTS}?user_id=${userId}`);
@@ -605,7 +620,7 @@ const app = {
         <div class="emp-profile-main">
           <div class="emp-stats-row">
             <div class="emp-stat-card">
-              <span class="emp-stat-label">Allowance</span>
+              <span class="emp-stat-label">Entitlement</span>
               <strong>${total}</strong>
               <div id="allowance-edit-area" style="margin-top:6px;">
                 <button class="btn btn-sm btn-outline" style="font-size:0.72rem; padding:3px 8px;" onclick="app.editAllowance(${u.id}, ${total})">
@@ -889,7 +904,7 @@ const app = {
             <div class="profile-identity-info">
               <h2 class="profile-display-name">${u.name}</h2>
               <div class="profile-badge-row">
-                <span class="profile-info-pill"><i class="fas fa-user-tie"></i> Title: ${u.role.charAt(0).toUpperCase() + u.role.slice(1)}</span>
+                <span class="profile-info-pill"><i class="fas fa-user-tie"></i> Title: ${(u.role || 'employee').charAt(0).toUpperCase() + (u.role || 'employee').slice(1)}</span>
                 <span class="profile-info-pill"><i class="fas fa-user-tag"></i> Employment: ${u.employment_type || 'Permanent'}</span>
               </div>
             </div>
@@ -914,35 +929,31 @@ const app = {
         </div>
 
         <div class="profile-edit-card">
+          ${this.state.role === 'manager' || this.state.role === 'admin' ? `` : `
           <div class="form-header align-left">
             <h2>Manage Profile</h2>
             <p class="text-muted">Update your personal and employment information.</p>
           </div>
           <form id="profile-edit-form" onsubmit="app.handleProfileUpdate(event)">
             <div class="edit-form-grid">
-              <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label>       <input type="text"  name="name"        value="${u.name}"           required></div>
-              <div class="form-group"><label><i class="fas fa-envelope"></i> Work Email</label>  <input type="email" name="email"       value="${u.email}"          required></div>
-              <div class="form-group"><label><i class="fas fa-id-card"></i> Employee ID</label>  <input type="text"  name="employee_id" value="${u.employee_id}"    required></div>
-              <div class="form-group"><label><i class="fas fa-building"></i> Department</label>  <input type="text"  name="department"  value="${u.department || ''}" placeholder="e.g. IT"></div>
-              <div class="form-group"><label><i class="fas fa-phone"></i> Phone Number</label>   <input type="text"  name="phone"       value="${u.phone      || ''}" placeholder="+60 12-345 6789"></div>
-              <div class="form-group"><label><i class="fas fa-briefcase"></i> Job Title</label>  <input type="text"  name="job_title"   value="${u.job_title  || ''}" placeholder="e.g. Senior Developer"></div>
-              <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location</label><input type="text" name="location"  value="${u.location   || ''}" placeholder="e.g. Cyberjaya Office"></div>
+              <div class="form-group"><label><i class="fas fa-user"></i> Full Name</label><input type="text" name="name" value="${u.name}" required></div>
+              <div class="form-group"><label><i class="fas fa-envelope"></i> Work Email</label><input type="email" name="email" value="${u.email}" data-original="${u.email}" required><p style="font-size:0.78rem;color:var(--text-sub);margin-top:4px;"><i class="fas fa-exclamation-circle" style="font-size:0.7rem;color:#f59e0b;"></i> Changing this will also change your login email.</p></div>
+              <div class="form-group"><label><i class="fas fa-id-card"></i> Employee ID</label><input type="text" name="employee_id" value="${u.employee_id}" required></div>
+              <div class="form-group"><label><i class="fas fa-building"></i> Department</label><select name="department">${['Administration','Business Development','Customer Service','Engineering','Finance & Accounting','Human Resources','Information Technology','Legal & Compliance','Logistics & Supply Chain','Management','Marketing','Operations','Procurement','Quality Assurance','Research & Development','Sales'].map(d=>`<option${d===(u.department||'')?` selected`:''}>${d}</option>`).join('')}</select></div>
+              <div class="form-group"><label><i class="fas fa-phone"></i> Phone Number</label><input type="text" name="phone" value="${u.phone || '+60'}" oninput="app.enforcePhonePrefix(this)" placeholder="+60 12-345 6789"></div>
+              <div class="form-group"><label><i class="fas fa-briefcase"></i> Job Title</label><select name="job_title">${(()=>{const g={'Management':['Chief Executive Officer','Chief Operating Officer','Chief Financial Officer','Chief Technology Officer','Director','Senior Manager','Manager','Assistant Manager'],'Professional':['Senior Engineer','Engineer','Senior Developer','Developer','Senior Analyst','Analyst','Consultant','Specialist','Supervisor'],'Support':['Senior Executive','Executive','Coordinator','Administrator','Officer','Clerk','Intern']};return Object.entries(g).map(([n,t])=>`<optgroup label="${n}">${t.map(x=>`<option${x===(u.job_title||'')?` selected`:''}>${x}</option>`).join('')}</optgroup>`).join('');})()}</select></div>
+              <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location</label><select name="location">${['Johor','Kedah','Kelantan','Kuala Lumpur','Labuan','Melaka','Negeri Sembilan','Pahang','Penang','Perak','Perlis','Putrajaya','Sabah','Sarawak','Selangor','Terengganu'].map(l=>`<option${l===(u.location||'')?` selected`:''}>${l}</option>`).join('')}</select></div>
               <div class="form-group">
                 <label><i class="fas fa-user-tag"></i> Employment Type</label>
                 <div class="emp-type-select-wrap">
                   <select name="employment_type">${etOptions}</select>
                 </div>
               </div>
-              ${this.state.role === 'manager' || this.state.role === 'admin' ? `
-              <div class="form-group">
-                <label><i class="fas fa-calendar-day"></i> Join Date</label>
-                <input type="date" name="join_date" value="${u.join_date || ''}" max="${new Date().toISOString().split('T')[0]}">
-              </div>` : `
               <div class="form-group">
                 <label><i class="fas fa-calendar-day"></i> Join Date</label>
                 <input type="text" value="${u.join_date ? new Date(u.join_date + 'T00:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : 'Not set'}" disabled style="background:var(--bg-section); color:var(--text-sub); cursor:not-allowed;">
-                <p style="font-size:0.78rem; color:var(--text-sub); margin-top:4px;"><i class="fas fa-lock" style="font-size:0.7rem;"></i> Managed by HR/Manager</p>
-              </div>`}
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-top:4px;"><i class="fas fa-lock" style="font-size:0.7rem;"></i> Managed by Manager</p>
+              </div>
             </div>
             <div class="form-footer" style="margin-top:30px; border-top:1px solid #eee; padding-top:20px; display:flex; justify-content:flex-end;">
               <button type="submit" class="btn btn-primary" id="btn-save-profile">
@@ -950,6 +961,7 @@ const app = {
               </button>
             </div>
           </form>
+          `}
 
           <div class="form-header align-left" style="margin-top:40px;">
             <h2>Security</h2>
@@ -992,6 +1004,7 @@ const app = {
     fd.append('end', end);
     fd.append('reason', reason);
     fd.append('duration', duration);
+    this.state.existingFiles.forEach(f => fd.append('kept_files[]', f));
     this.state.uploadedFiles.forEach(f => fd.append('proof_files[]', f));
 
     let res = null;
@@ -1006,6 +1019,7 @@ const app = {
       e.target.reset();
       this.state.editingRequestId = null;
       this.state.uploadedFiles    = [];
+      this.state.existingFiles    = [];
       this.renderFilePreview();
       await this.refreshAndRender();
       this.switchTab('dashboard', 'Dashboard');
@@ -1022,17 +1036,28 @@ const app = {
     if (!req) return;
     this.state.editingRequestId = id;
     this.state.uploadedFiles    = [];
+    this.state.existingFiles    = Array.isArray(req.proofFiles) ? [...req.proofFiles] : [];
     this.renderFilePreview();
     this.switchTab('apply-leave', 'Edit Leave');
+
+    // Update card title to reflect edit mode
+    const formTitle = document.getElementById('leave-form-title');
+    if (formTitle) formTitle.textContent = 'Edit Leave Request';
+
+    // Restore leave type radio
+    const typeRadio = document.querySelector(`input[name="leave-type"][value="${req.type}"]`);
+    if (typeRadio) typeRadio.click();
+
     document.getElementById('start-date').value = req.start;
     document.getElementById('end-date').value   = req.end;
-    document.getElementById('reason').value     = req.reason;
+    document.getElementById('reason').value     = req.reason || '';
   },
 
   async cancelRequest(id) {
     if (!confirm('Are you sure you want to cancel this leave request?')) return;
     const res = await this.fetchAPI(API.DELETE_REQUEST, 'POST', { id });
     if (res && res.ok) {
+      this.resetLeaveForm();
       this.showToast('Cancelled', 'Your leave request has been withdrawn.');
       await this.refreshAndRender();
     } else {
@@ -1053,7 +1078,10 @@ const app = {
         <button class="btn btn-outline" onclick="app.closeModal()">Cancel</button>
         <button class="btn btn-primary" id="btn-confirm-action">Confirm</button>
       </div>`;
-    document.querySelector('.modal-header h3').innerText = title;
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-subtitle').textContent = '';
+    const fb = document.getElementById('modal-footer-bar');
+    if (fb) fb.style.display = 'none';
     document.getElementById('detail-modal').classList.add('open');
     document.getElementById('btn-confirm-action').onclick = () => {
       const comment = document.getElementById('action-comment').value;
@@ -1093,53 +1121,118 @@ const app = {
     const req = this.state.requests.find(r => r.id == id);
     if (!req) return;
 
-    let proofHtml = '';
+    // Header
+    document.getElementById('modal-title').textContent    = 'Leave Application Details';
+    document.getElementById('modal-subtitle').innerHTML   =
+      `LEAVE-${String(req.id).padStart(5, '0')} &nbsp;<span class="badge status-${req.status.toLowerCase()}">${req.status}</span>`;
+
+    // Leave type icon
+    const typeIconMap = { Annual:'fa-umbrella-beach', Sick:'fa-thermometer-half', Unpaid:'fa-money-bill-wave', Emergency:'fa-bolt', Compassionate:'fa-heart', Maternity:'fa-baby', Paternity:'fa-baby-carriage' };
+    const typeIcon = typeIconMap[req.type] || 'fa-calendar-alt';
+
+    // Attachments — list style
+    let attachHtml = '';
     if (req.proofFiles && req.proofFiles.length > 0) {
       const items = req.proofFiles.map(f => {
         const isImg  = /\.(jpg|jpeg|png|gif|webp)$/i.test(f);
         const viewUrl = `uploads/${f}`;
         const dlUrl   = `api-file-download.php?f=${encodeURIComponent(f)}`;
         return `
-          <div class="proof-file-card">
-            ${isImg
-              ? `<a href="${viewUrl}" target="_blank" class="proof-img-link"><img src="${viewUrl}" alt="proof"></a>`
-              : `<a href="${viewUrl}" target="_blank" class="proof-pdf-link"><i class="fas fa-file-pdf"></i><span>${f}</span></a>`}
-            <a href="${dlUrl}" class="proof-download-btn"><i class="fas fa-download"></i> Download</a>
+          <div class="modal-attach-item">
+            <div class="modal-attach-thumb">
+              ${isImg
+                ? `<img src="${viewUrl}" alt="attachment">`
+                : `<i class="fas fa-file-pdf"></i>`}
+            </div>
+            <span class="modal-attach-name">${f}</span>
+            <div class="modal-attach-actions">
+              <a href="${viewUrl}" target="_blank" class="modal-attach-link"><i class="fas fa-eye"></i> View Full</a>
+              <a href="${dlUrl}" class="modal-attach-link"><i class="fas fa-download"></i> Download</a>
+            </div>
           </div>`;
       }).join('');
-      proofHtml = `
+      attachHtml = `
         <div class="proof-files-section">
           <span class="proof-files-label"><i class="fas fa-paperclip"></i> Attachments</span>
-          <div class="proof-files-grid">${items}</div>
+          ${items}
         </div>`;
     }
 
     document.getElementById('modal-content').innerHTML = `
-      <div class="modal-badge-row">
-        <span class="badge status-${req.status.toLowerCase()}">${req.status}</span>
+      <div class="modal-emp-card">
+        <div class="modal-emp-avatar">${this.getInitials(req.empName)}</div>
+        <div class="modal-emp-info">
+          <strong class="modal-emp-name">${req.empName}</strong>
+          <span class="modal-emp-meta">${[req.empTitle, req.empDept].filter(Boolean).join(' · ')}</span>
+        </div>
       </div>
-      <div class="detail-row"><span>Employee</span><strong>${req.empName}</strong></div>
-      <div class="detail-row"><span>Type</span>    <strong>${req.type}</strong></div>
-      <div class="detail-row"><span>Period</span>  <strong>${req.start} to ${req.end}</strong></div>
-      <div class="detail-row"><span>Duration</span><strong>${req.duration} Days</strong></div>
-      <div class="detail-row"><span>Reason</span>  <strong>${req.reason || 'No reason provided'}</strong></div>
-      ${proofHtml}
+      <div class="modal-info-grid">
+        <div class="modal-info-item">
+          <span class="modal-info-label">Leave Type</span>
+          <div class="modal-leave-type-val"><i class="fas ${typeIcon}"></i><strong class="modal-info-value">${req.type}</strong></div>
+        </div>
+        <div class="modal-info-item">
+          <span class="modal-info-label">Period</span>
+          <strong class="modal-info-value">${req.start} &rarr; ${req.end} <span class="modal-duration-tag">${req.duration} Day${req.duration != 1 ? 's' : ''}</span></strong>
+        </div>
+      </div>
+      <div class="modal-reason-box">
+        <span class="modal-reason-label"><i class="fas fa-info-circle"></i> Reason</span>
+        <p class="modal-reason-text">${req.reason || '<em style="color:var(--text-sub)">No reason provided</em>'}</p>
+      </div>
+      ${attachHtml}
       ${req.comment ? `
-        <div class="approver-comment-box">
+        <div class="approver-comment-box${req.status === 'Rejected' ? ' rejected' : ''}">
           <span class="comment-label">Manager's Comment</span>
           <p class="comment-text">${req.comment}</p>
         </div>` : ''}`;
+
+    // Footer bar
+    const footerBar = document.getElementById('modal-footer-bar');
+    const isManager = this.state.currentUser.role === 'manager' || this.state.currentUser.role === 'admin';
+    if (footerBar) {
+      const raw = req.createdAt || '';
+      const timeStr = raw ? raw.replace('T', ' ').slice(0, 16) : req.date;
+      footerBar.style.display = 'flex';
+      footerBar.innerHTML = `
+        <span class="modal-footer-ts"><i class="fas fa-clock"></i> Requested: ${timeStr}</span>
+        <div class="modal-footer-actions">
+          ${isManager && req.status === 'Pending' ? `
+            <button class="btn btn-sm btn-reject-outline" onclick="app.rejectRequest(${req.id})"><i class="fas fa-times"></i> Reject</button>
+            <button class="btn btn-sm btn-primary" onclick="app.approveRequest(${req.id})"><i class="fas fa-check"></i> Approve Leave</button>
+          ` : ''}
+        </div>`;
+    }
+
     document.getElementById('detail-modal').classList.add('open');
   },
 
   closeModal() {
     document.getElementById('detail-modal').classList.remove('open');
+    const fb = document.getElementById('modal-footer-bar');
+    if (fb) fb.style.display = 'none';
   },
 
   /* ─── Profile Edit & Password ─── */
 
+  enforcePhonePrefix(input) {
+    if (!input.value.startsWith('+60')) {
+      const stripped = input.value.replace(/^\+?6?0?/, '');
+      input.value = '+60' + stripped;
+    }
+  },
+
   async handleProfileUpdate(e) {
     e.preventDefault();
+
+    const emailInput   = e.target.querySelector('input[name="email"]');
+    const originalEmail = emailInput?.dataset.original || '';
+    const newEmail      = emailInput?.value || '';
+    if (newEmail && newEmail !== originalEmail) {
+      const ok = confirm(`Changing your Work Email will also change your login credential.\n\nNew login email: ${newEmail}\n\nAre you sure you want to continue?`);
+      if (!ok) return;
+    }
+
     const btn          = document.getElementById('btn-save-profile');
     const originalText = btn.innerHTML;
     btn.disabled  = true;
@@ -1207,9 +1300,13 @@ const app = {
   },
 
   handleFileSelect(files) {
-    const MAX_SIZE    = 5 * 1024 * 1024;
-    const ALLOWED     = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const MAX_SIZE = 5 * 1024 * 1024;
+    const MAX_FILES = 3;
+    const ALLOWED  = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     Array.from(files).forEach(file => {
+      if (this.state.existingFiles.length + this.state.uploadedFiles.length >= MAX_FILES) {
+        return this.showToast('Limit Reached', `Maximum ${MAX_FILES} files allowed per request.`, 'danger');
+      }
       if (!ALLOWED.includes(file.type)) {
         return this.showToast('Unsupported File', `${file.name} — only PDF and images are allowed.`, 'danger');
       }
@@ -1224,12 +1321,35 @@ const app = {
   renderFilePreview() {
     const preview = document.getElementById('upload-preview');
     if (!preview) return;
-    if (this.state.uploadedFiles.length === 0) { preview.innerHTML = ''; return; }
+    const existing = this.state.existingFiles;
+    const fresh    = this.state.uploadedFiles;
+    if (existing.length === 0 && fresh.length === 0) { preview.innerHTML = ''; return; }
 
-    preview.innerHTML = this.state.uploadedFiles.map((file, i) => {
-      const isImage  = file.type.startsWith('image/');
-      const blobUrl  = URL.createObjectURL(file);
-      const size     = file.size > 1024 * 1024
+    const existingHtml = existing.map((filename, i) => {
+      const ext     = filename.split('.').pop().toLowerCase();
+      const isImage = ['jpg','jpeg','png','gif','webp'].includes(ext);
+      const label   = filename.replace(/^proof_[^.]+\./, 'file.').slice(0, 30);
+      return `
+        <div class="preview-item">
+          <a href="api-file-download.php?f=${encodeURIComponent(filename)}" target="_blank" class="preview-media-link">
+            ${isImage
+              ? `<img class="preview-thumb" src="api-file-download.php?f=${encodeURIComponent(filename)}" alt="${label}">`
+              : `<div class="preview-icon-pdf"><i class="fas fa-file-pdf"></i></div>`}
+          </a>
+          <div class="preview-info">
+            <a href="api-file-download.php?f=${encodeURIComponent(filename)}" target="_blank" class="preview-name-link">${label}</a>
+            <span class="preview-size" style="color:#f59e0b;">Saved</span>
+          </div>
+          <button class="preview-remove" type="button" onclick="app.removeExistingFile(${i})">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>`;
+    }).join('');
+
+    const freshHtml = fresh.map((file, i) => {
+      const isImage = file.type.startsWith('image/');
+      const blobUrl = URL.createObjectURL(file);
+      const size    = file.size > 1024 * 1024
         ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
         : Math.round(file.size / 1024) + ' KB';
       return `
@@ -1248,11 +1368,28 @@ const app = {
           </button>
         </div>`;
     }).join('');
+
+    preview.innerHTML = existingHtml + freshHtml;
+  },
+
+  removeExistingFile(index) {
+    this.state.existingFiles.splice(index, 1);
+    this.renderFilePreview();
   },
 
   removeFile(index) {
     this.state.uploadedFiles.splice(index, 1);
     this.renderFilePreview();
+  },
+
+  resetLeaveForm() {
+    this.state.editingRequestId = null;
+    this.state.uploadedFiles    = [];
+    this.state.existingFiles    = [];
+    this.renderFilePreview();
+    document.getElementById('leave-request-form')?.reset();
+    const formTitle = document.getElementById('leave-form-title');
+    if (formTitle) formTitle.textContent = 'Submit Request';
   },
 
   /* ─── Toast Notification ─── */
@@ -1270,13 +1407,17 @@ const app = {
 
   bindEvents() {
     document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => this.switchTab(item.dataset.target, item.innerText.trim()));
+      item.addEventListener('click', () => {
+        if (item.dataset.target === 'apply-leave') this.resetLeaveForm();
+        this.switchTab(item.dataset.target, item.innerText.trim());
+      });
     });
 
     document.getElementById('btn-notifications')?.addEventListener('click', () => {
       this.switchTab('notifications', 'Notifications');
     });
     document.getElementById('btn-quick-apply')?.addEventListener('click', () => {
+      this.resetLeaveForm();
       this.switchTab('apply-leave', 'Submit Request');
     });
 
