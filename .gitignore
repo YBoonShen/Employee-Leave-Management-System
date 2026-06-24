@@ -1,0 +1,14 @@
+# User uploaded files — keep folder, ignore contents
+uploads/*
+!uploads/.gitkeep
+
+# One-time setup / diagnostic scripts
+setup-*.php
+
+# Environment / secrets
+config.local.php
+.env
+
+# OS
+.DS_Store
+Thumbs.db
