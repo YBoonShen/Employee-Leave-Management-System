@@ -940,7 +940,7 @@ const app = {
               <div class="form-group"><label><i class="fas fa-envelope"></i> Work Email</label><input type="email" name="email" value="${u.email}" data-original="${u.email}" required><p style="font-size:0.78rem;color:var(--text-sub);margin-top:4px;"><i class="fas fa-exclamation-circle" style="font-size:0.7rem;color:#f59e0b;"></i> Changing this will also change your login email.</p></div>
               <div class="form-group"><label><i class="fas fa-id-card"></i> Employee ID</label><input type="text" name="employee_id" value="${u.employee_id}" required></div>
               <div class="form-group"><label><i class="fas fa-building"></i> Department</label><select name="department">${['Administration','Business Development','Customer Service','Engineering','Finance & Accounting','Human Resources','Information Technology','Legal & Compliance','Logistics & Supply Chain','Management','Marketing','Operations','Procurement','Quality Assurance','Research & Development','Sales'].map(d=>`<option${d===(u.department||'')?` selected`:''}>${d}</option>`).join('')}</select></div>
-              <div class="form-group"><label><i class="fas fa-phone"></i> Phone Number</label><input type="text" name="phone" value="${u.phone || '+60'}" oninput="app.enforcePhonePrefix(this)" placeholder="+60 12-345 6789"></div>
+              <div class="form-group"><label><i class="fas fa-phone"></i> Phone Number</label><input type="text" name="phone" value="${u.phone || '+60'}" oninput="app.enforcePhonePrefix(this)" onkeydown="app.blockPhonePrefixDelete(this,event)" placeholder="+60 12-345 6789"></div>
               <div class="form-group"><label><i class="fas fa-briefcase"></i> Job Title</label><select name="job_title">${(()=>{const g={'Management':['Chief Executive Officer','Chief Operating Officer','Chief Financial Officer','Chief Technology Officer','Director','Senior Manager','Manager','Assistant Manager'],'Professional':['Senior Engineer','Engineer','Senior Developer','Developer','Senior Analyst','Analyst','Consultant','Specialist','Supervisor'],'Support':['Senior Executive','Executive','Coordinator','Administrator','Officer','Clerk','Intern']};return Object.entries(g).map(([n,t])=>`<optgroup label="${n}">${t.map(x=>`<option${x===(u.job_title||'')?` selected`:''}>${x}</option>`).join('')}</optgroup>`).join('');})()}</select></div>
               <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location</label><select name="location">${['Johor','Kedah','Kelantan','Kuala Lumpur','Labuan','Melaka','Negeri Sembilan','Pahang','Penang','Perak','Perlis','Putrajaya','Sabah','Sarawak','Selangor','Terengganu'].map(l=>`<option${l===(u.location||'')?` selected`:''}>${l}</option>`).join('')}</select></div>
               <div class="form-group">
@@ -1219,6 +1219,13 @@ const app = {
     if (!input.value.startsWith('+60')) {
       const stripped = input.value.replace(/^\+?6?0?/, '');
       input.value = '+60' + stripped;
+    }
+  },
+
+  blockPhonePrefixDelete(input, e) {
+    const sel = input.selectionStart;
+    if ((e.key === 'Backspace' || e.key === 'Delete') && sel <= 3) {
+      e.preventDefault();
     }
   },
 

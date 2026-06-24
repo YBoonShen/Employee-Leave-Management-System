@@ -102,6 +102,12 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// Phone must start with +60 if provided
+if ($phone !== '' && !preg_match('/^\+60[\d\s\-]{7,13}$/', $phone)) {
+    header('Location: page-register.php?error=invalid_phone');
+    exit;
+}
+
 // Password must meet Strong criteria
 if (
     strlen($password) < 8 ||

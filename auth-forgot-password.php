@@ -39,8 +39,14 @@ try {
     if ($step === 'reset') {
         $password = $input['password'] ?? '';
 
-        if (strlen($password) < 6) {
-            echo json_encode(['error' => 'Password must be at least 6 characters.']);
+        if (
+            strlen($password) < 8 ||
+            !preg_match('/[A-Z]/', $password) ||
+            !preg_match('/[a-z]/', $password) ||
+            !preg_match('/[0-9]/', $password) ||
+            !preg_match('/[^A-Za-z0-9]/', $password)
+        ) {
+            echo json_encode(['error' => 'Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and symbol.']);
             exit;
         }
 

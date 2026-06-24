@@ -24,9 +24,9 @@ try {
     $mCheck = $db->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
     $mCheck->execute([':email' => 'boonshen1159@gmail.com']);
     if (!$mCheck->fetch()) {
-        $mHash = password_hash('Nexus@2024', PASSWORD_DEFAULT);
+        $mHash = password_hash('Yeap05**', PASSWORD_DEFAULT);
         $db->prepare('INSERT INTO users (employee_id, name, email, password_hash, role, department, job_title)
-                      VALUES ("MGR001", "Boon Shen", "boonshen1159@gmail.com", :h, "manager", "Management", "General Manager")')
+                      VALUES ("EMP000", "Boon Shen", "boonshen1159@gmail.com", :h, "manager", "Management", "General Manager")')
            ->execute([':h' => $mHash]);
     } else {
         // Only enforce manager role — never overwrite the name (allows profile edits to persist)

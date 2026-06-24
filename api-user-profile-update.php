@@ -31,6 +31,13 @@ $job_title   = trim($payload['job_title']   ?? '');
 $email       = trim($payload['email']       ?? '');
 $employee_id = trim($payload['employee_id'] ?? '');
 
+// Phone must start with +60 if provided
+if ($phone !== '' && !preg_match('/^\+60[\d\s\-]{7,13}$/', $phone)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Phone number must start with +60']);
+    exit;
+}
+
 // Validate employment type against allowed values
 $allowed_types   = ['Permanent', 'Contract', 'Part-Time'];
 $employment_type = in_array($payload['employment_type'] ?? '', $allowed_types)

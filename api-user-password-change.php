@@ -14,13 +14,14 @@ $current = $payload['current'] ?? '';
 $new = $payload['new'] ?? '';
 
 if (
-    strlen($new) < 6 ||
-    !preg_match('/[A-Za-z]/', $new) ||
+    strlen($new) < 8 ||
+    !preg_match('/[A-Z]/', $new) ||
+    !preg_match('/[a-z]/', $new) ||
     !preg_match('/[0-9]/', $new) ||
     !preg_match('/[^A-Za-z0-9]/', $new)
 ) {
     http_response_code(400);
-    echo json_encode(['error' => 'Password must be at least 6 characters and include a letter, number, and symbol']);
+    echo json_encode(['error' => 'Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and symbol']);
     exit;
 }
 

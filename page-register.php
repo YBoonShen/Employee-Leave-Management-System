@@ -143,7 +143,9 @@ if (isset($_SESSION['user_id'])) {
                 <div class="form-row">
                     <div class="form-col">
                         <label>Phone Number (Malaysia)</label>
-                        <input type="text" name="phone" value="+60" placeholder="+60 12-345 6789" required>
+                        <input type="text" name="phone" value="+60" placeholder="+60 12-345 6789" required
+                               oninput="enforcePhonePrefix(this)"
+                               onkeydown="blockPhonePrefixDelete(this, event)">
                     </div>
                     <div class="form-col">
                         <label>Location</label>
@@ -250,6 +252,20 @@ if (isset($_SESSION['user_id'])) {
             document.getElementById('reg-pw-strength').innerHTML = getStrengthBar(this.value);
         });
 
+        function enforcePhonePrefix(input) {
+            if (!input.value.startsWith('+60')) {
+                const stripped = input.value.replace(/^\+?6?0?/, '');
+                input.value = '+60' + stripped;
+            }
+        }
+
+        function blockPhonePrefixDelete(input, e) {
+            const sel = input.selectionStart;
+            if ((e.key === 'Backspace' || e.key === 'Delete') && sel <= 3) {
+                e.preventDefault();
+            }
+        }
+
         function validateRegister(e) {
             const name  = document.querySelector('input[name="name"]').value.trim();
             const empId = document.getElementById('reg-emp-id').value.trim();
@@ -281,6 +297,12 @@ if (isset($_SESSION['user_id'])) {
             // Email must contain @ and a domain
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 return fail('Please enter a valid email address (e.g. ali@company.com).');
+            }
+
+            // Phone must start with +60
+            const phone = document.querySelector('input[name="phone"]').value.trim();
+            if (!/^\+60[\d\s\-]{7,13}$/.test(phone)) {
+                return fail('Phone number must start with +60 and be a valid Malaysian number (e.g. +60 12-345 6789).');
             }
 
             // Password must be Strong (all 4 criteria)
