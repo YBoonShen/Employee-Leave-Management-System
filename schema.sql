@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS nexusleave CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE nexusleave;
+CREATE DATABASE IF NOT EXISTS `employee-leave-management-system` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `employee-leave-management-system`;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,

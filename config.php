@@ -3,7 +3,7 @@
 // Adjust these values to match your local MySQL setup.
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'nexusleave');
+define('DB_NAME', 'employee-leave-management-system');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 

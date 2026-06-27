@@ -79,7 +79,7 @@ Open the XAMPP Control Panel and start both:
    ```
 4. Click **Go**
 
-> `schema.sql` automatically creates the database `nexusleave` and all three tables. No need to create the database manually.
+> `schema.sql` automatically creates the database `employee-leave-management-system` and all three tables. No need to create the database manually.
 
 ---
 

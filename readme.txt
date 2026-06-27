@@ -52,8 +52,8 @@ STEP 3 — SET UP THE DATABASE
 6. You should see a green success message.
 
    NOTE: schema.sql automatically creates the database called
-   "nexusleave" and all three tables. You do not need to create
-   the database manually.
+   "employee-leave-management-system" and all three tables.
+   You do not need to create the database manually.
 
 
 ================================================================
@@ -126,7 +126,8 @@ Fix    : Make sure Apache is running in XAMPP.
 Problem: Database connection error
 Fix    : Make sure MySQL is running in XAMPP.
          Make sure you imported schema.sql correctly.
-         The database name must be "nexusleave" (set in config.php).
+         The database name must be "employee-leave-management-system"
+         (set in config.php).
 
 Problem: Cannot log in as Manager
 Fix    : Just open the Login page. The system creates the
