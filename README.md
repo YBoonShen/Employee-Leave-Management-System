@@ -72,16 +72,14 @@ Open the XAMPP Control Panel and start both:
 ### Step 3 — Set up the database
 
 1. Open your browser and go to `http://localhost/phpmyadmin`
-2. Click **New** and create a database named:
+2. Click the **Import** tab at the top (do **not** select any database first)
+3. Click **Choose File** and select:
    ```
-   leave_management
+   schema.sql
    ```
-3. Select the database, go to the **Import** tab
-4. Import the file:
-   ```
-   seed-manager-profile.sql
-   ```
-5. Click **Go**
+4. Click **Go**
+
+> `schema.sql` automatically creates the database `nexusleave` and all three tables. No need to create the database manually.
 
 ---
 

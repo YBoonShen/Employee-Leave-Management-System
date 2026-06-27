@@ -44,18 +44,16 @@ STEP 3 — SET UP THE DATABASE
 1. Open your browser and go to:
       http://localhost/phpmyadmin
 
-2. Click "New" on the left side.
-3. Type this as the database name:
-      leave_management
-4. Click Create.
+2. Click the "Import" tab at the top (do NOT select any database first).
+3. Click "Choose File".
+4. Go to the project folder and select the file:
+      schema.sql
+5. Scroll down and click "Go".
+6. You should see a green success message.
 
-5. Click on "leave_management" in the left panel.
-6. Click the "Import" tab at the top.
-7. Click "Choose File".
-8. Go to the project folder and select the file:
-      seed-manager-profile.sql
-9. Scroll down and click "Go".
-10. You should see a green success message.
+   NOTE: schema.sql automatically creates the database called
+   "nexusleave" and all three tables. You do not need to create
+   the database manually.
 
 
 ================================================================
@@ -79,7 +77,7 @@ LOGIN DETAILS
    Password  :  Yeap05**
 
    The manager account is created automatically by the system
-   the first time anyone logs in.
+   the first time you visit the Login page.
    No extra setup is needed.
 
 ---- EMPLOYEE ACCOUNT ----
@@ -88,9 +86,9 @@ LOGIN DETAILS
 
    Password must have:
    - At least 8 characters
-   - One uppercase letter  (A–Z)
-   - One lowercase letter  (a–z)
-   - One number            (0–9)
+   - One uppercase letter  (A-Z)
+   - One lowercase letter  (a-z)
+   - One number            (0-9)
    - One special symbol    (e.g. @, #, !)
 
    Example:  Ahmad123!
@@ -100,42 +98,48 @@ LOGIN DETAILS
 FOLDER STRUCTURE (what is inside the project)
 ================================================================
 
-   page-login.php          — Login page
-   page-register.php       — Register page
-   page-main.php           — Main dashboard (Employee + Manager)
-   auth-login-process.php  — Handles login
-   auth-register-process.php — Handles registration
-   auth-forgot-password.php  — Handles password reset
-   api-*.php               — All backend API endpoints
-   script.js               — All frontend JavaScript
-   styles.css              — All CSS styling
-   config.php              — Database connection settings
-   uploads/                — Folder where proof files are saved
-   seed-manager-profile.sql — SQL file to set up the database
+   page-login.php             — Login page
+   page-register.php          — Register page
+   page-main.php              — Main dashboard (Employee + Manager)
+   auth-login-process.php     — Handles login
+   auth-register-process.php  — Handles registration
+   auth-forgot-password.php   — Handles password reset
+   auth-logout-process.php    — Handles logout
+   api-*.php                  — All backend API endpoints
+   script.js                  — All frontend JavaScript
+   styles.css                 — All CSS styling
+   config.php                 — Database connection settings
+   schema.sql                 — Database setup (run this first)
+   seed-manager-profile.sql   — Optional: fills manager profile details
+   uploads/                   — Folder where proof files are saved
 
 
 ================================================================
 IF SOMETHING DOES NOT WORK
 ================================================================
 
-Problem: Page not found (404)
+Problem: Page not found (404 error)
 Fix    : Make sure Apache is running in XAMPP.
-         Make sure the folder is inside htdocs.
+         Make sure the project folder is inside htdocs and named
+         exactly "Employee-Leave-Management-System".
 
-Problem: Database error
+Problem: Database connection error
 Fix    : Make sure MySQL is running in XAMPP.
-         Make sure you created the database named "leave_management"
-         and imported the SQL file.
+         Make sure you imported schema.sql correctly.
+         The database name must be "nexusleave" (set in config.php).
 
 Problem: Cannot log in as Manager
-Fix    : Just open the Login page and log in once.
-         The system creates the manager account automatically.
+Fix    : Just open the Login page. The system creates the
+         manager account automatically on first visit.
 
 Problem: Uploaded files not saving
-Fix    : The "uploads" folder must exist inside the project folder.
-         Create it manually if it is missing.
+Fix    : Make sure the "uploads" folder exists inside the project
+         folder. Create it manually if it is missing.
 
 
+================================================================
+  Full source code also available at:
+  https://github.com/YBoonShen/Employee-Leave-Management-System
 ================================================================
   Built with HTML5, CSS3, JavaScript, PHP, and MySQL
   Runs on Apache via XAMPP
