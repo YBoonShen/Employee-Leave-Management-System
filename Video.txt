@@ -1,0 +1,27 @@
+NexusLeave — Video Presentation
+TWT2231 Web Techniques and Applications
+Lab Section: 1F
+
+================================================================
+VIDEO LINK
+================================================================
+
+[Paste your YouTube or OneDrive video link here]
+
+
+
+================================================================
+GITHUB REPOSITORY
+================================================================
+
+Full source code is available at:
+https://github.com/YBoonShen/Employee-Leave-Management-System
+
+================================================================
+GROUP MEMBERS
+================================================================
+
+1. Yeap Boon Shen     — 242UT244D2
+2. Lee Jia Yin        — 242UT241HP
+3. Samantha Chan Pei Yin — 243UT246VN
+4. Teo Kee Jie        — 243UT246G2
